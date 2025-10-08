@@ -1,14 +1,42 @@
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import ImageUploadIcon from "../../components/icons/ImageUploadIcon";
 import useFileDrop from "../../hooks/useFileDrop";
+
+import Toast from "../../components/Toast";
+import useToast from "../../hooks/useToast";
+import validateFiles from "../../hooks/validateFiles";
+import { isMobile } from "../../utils";
+import {
+  MAX_SIZE_TOOLTIP_DESKTOP,
+  MAX_SIZE_TOOLTIP_MOBILE,
+} from "../../utils/const";
 import DropOverlay from "./DropOverlay";
 
 const Converter = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toasts, showToast, removeToast } = useToast();
+
+  const maxSize = useMemo(
+    () => (isMobile() ? MAX_SIZE_TOOLTIP_MOBILE : MAX_SIZE_TOOLTIP_DESKTOP),
+    []
+  );
 
   const handleFilesAdded = (files: File[]) => {
-    setSelectedFiles((prev) => [...prev, ...files]);
+    const { valid, invalid } = validateFiles(files, selectedFiles);
+
+    if (valid.length > 0) {
+      setSelectedFiles((prev) => [...prev, ...valid]);
+    }
+
+    if (invalid.length > 0) {
+      const rejectedFiles = invalid.map((item) => ({
+        name: item.file.name,
+        reason: item.reason,
+      }));
+      showToast(rejectedFiles);
+      console.log("거부된 파일:", invalid);
+    }
   };
 
   const { isDragging, fileCount } = useFileDrop(handleFilesAdded);
@@ -18,7 +46,7 @@ const Converter = () => {
     if (!files) return;
 
     const fileArray = Array.from(files);
-    setSelectedFiles(fileArray);
+    handleFilesAdded(fileArray);
   };
 
   const handleUploadClick = () => {
@@ -37,9 +65,12 @@ const Converter = () => {
             <ImageUploadIcon className="w-20 h-20 text-gray-400 group-hover:text-blue-500 transition-colors" />
           </div>
           <div className="gap-2 flex flex-col items-center">
-            <div>Drag and drop your images here</div>
-            <p className="text-gray-400 text-sm">or</p>
-            <div>Upload Files</div>
+            <div>이미지를 드래그하세요.</div>
+            <p className="text-gray-400 text-sm">또는</p>
+            <div>파일을 업로드하세요.</div>
+            <p className="mt-1 text-xs text-gray-400">
+              최대 {maxSize} (개당 100MB)
+            </p>
           </div>
           <input
             type="file"
@@ -65,6 +96,12 @@ const Converter = () => {
       </section>
 
       {isDragging && <DropOverlay fileCount={fileCount} />}
+
+      <div className="fixed top-4 right-4 z-50 space-y-2">
+        {toasts.map((toast) => (
+          <Toast key={toast.id} toast={toast} onRemove={removeToast} />
+        ))}
+      </div>
     </div>
   );
 };
