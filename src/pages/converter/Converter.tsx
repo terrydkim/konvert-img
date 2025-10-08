@@ -11,9 +11,10 @@ import {
   MAX_SIZE_TOOLTIP_MOBILE,
 } from "../../utils/const";
 import DropOverlay from "./DropOverlay";
+import FileTable, { type FileItem } from "./FileTable";
 
 const Converter = () => {
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<FileItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toasts, showToast, removeToast } = useToast();
 
@@ -23,10 +24,19 @@ const Converter = () => {
   );
 
   const handleFilesAdded = (files: File[]) => {
-    const { valid, invalid } = validateFiles(files, selectedFiles);
+    const { valid, invalid } = validateFiles(
+      files,
+      selectedFiles.map((f) => f.file)
+    );
 
     if (valid.length > 0) {
-      setSelectedFiles((prev) => [...prev, ...valid]);
+      const newFileItems: FileItem[] = valid.map((file) => ({
+        id: crypto.randomUUID(),
+        file,
+        preview: URL.createObjectURL(file),
+        targetExtension: "webp",
+      }));
+      setSelectedFiles((prev) => [...prev, ...newFileItems]);
     }
 
     if (invalid.length > 0) {
@@ -37,6 +47,14 @@ const Converter = () => {
       showToast(rejectedFiles);
       console.log("거부된 파일:", invalid);
     }
+  };
+
+  const removeFile = (id: string) => {
+    setSelectedFiles((prev) => {
+      const file = prev.find((file) => file.id === id);
+      if (file) URL.revokeObjectURL(file.preview);
+      return prev.filter((file) => file.id !== id);
+    });
   };
 
   const { isDragging, fileCount } = useFileDrop(handleFilesAdded);
@@ -82,18 +100,11 @@ const Converter = () => {
           />
         </div>
       </section>
-      <section className="mb-6 text-left bg-white p-6 rounded-lg shadow-md">
-        {selectedFiles.length > 0 && (
-          <div>
-            <h3>Selected Files:</h3>
-            <ul>
-              {selectedFiles.map((file, index) => (
-                <li key={index}>{file.name}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </section>
+      {selectedFiles.length > 0 && (
+        <section className="mb-6 text-left bg-white p-6 rounded-lg shadow-md">
+          <FileTable files={selectedFiles} onRemove={removeFile} />
+        </section>
+      )}
 
       {isDragging && <DropOverlay fileCount={fileCount} />}
 
