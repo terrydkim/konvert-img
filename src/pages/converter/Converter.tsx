@@ -3,6 +3,9 @@ import ImageUploadIcon from "../../components/icons/ImageUploadIcon";
 import useFileDrop from "../../hooks/useFileDrop";
 
 import Toast from "../../components/Toast";
+import useImageConverter, {
+  type ConversionProgress,
+} from "../../hooks/useImageConverter";
 import useToast from "../../hooks/useToast";
 import validateFiles from "../../hooks/validateFiles";
 import { isMobile } from "../../utils";
@@ -35,6 +38,7 @@ const Converter = () => {
         file,
         preview: URL.createObjectURL(file),
         targetExtension: "webp",
+        status: "pending",
       }));
       setSelectedFiles((prev) => [...prev, ...newFileItems]);
     }
@@ -71,6 +75,35 @@ const Converter = () => {
     fileInputRef.current?.click();
   };
 
+  const { isConverting, startConversion } = useImageConverter();
+
+  const handleConvert = () => {
+    const filesToConvert = selectedFiles
+      .filter((f) => f.status === "pending" || f.status === "error")
+      .map((f) => ({
+        id: f.id,
+        file: f.file,
+      }));
+
+    startConversion(filesToConvert, (progressData: ConversionProgress) => {
+      setSelectedFiles((prev) =>
+        prev.map((file) =>
+          file.id === progressData.id
+            ? {
+                ...file,
+                status: progressData.status,
+                progress: progressData.progress,
+                convertedBlob: progressData.result?.blob,
+                convertedUrl: progressData.result?.url,
+                convertedSize: progressData.result?.size,
+                error: progressData.error,
+              }
+            : file
+        )
+      );
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <h1 className="text-4xl font-bold mb-6 text-center">Image Converter</h1>
@@ -103,6 +136,22 @@ const Converter = () => {
       {selectedFiles.length > 0 && (
         <section className="mb-6 text-left bg-white p-6 rounded-lg shadow-md">
           <FileTable files={selectedFiles} onRemove={removeFile} />
+          {/* 변환 버튼 */}
+          <div className="mt-4">
+            <button
+              onClick={handleConvert}
+              disabled={isConverting}
+              className={`w-full py-3 rounded-lg font-medium transition-colors cursor-pointer ${
+                isConverting
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
+            >
+              {isConverting
+                ? `변환 중... `
+                : `${selectedFiles.length}개 파일 변환하기`}
+            </button>
+          </div>
         </section>
       )}
 

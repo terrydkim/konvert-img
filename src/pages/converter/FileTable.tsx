@@ -1,4 +1,4 @@
-import { Settings, Trash2 } from "lucide-react";
+import { Loader2, Settings, Trash2 } from "lucide-react";
 import { formatFileSize, getFileExtension } from "../../utils";
 
 export interface FileItem {
@@ -6,6 +6,12 @@ export interface FileItem {
   file: File;
   preview: string;
   targetExtension: string;
+  status: "pending" | "converting" | "success" | "error";
+  progress?: number;
+  error?: string;
+  convertedBlob?: Blob;
+  convertedUrl?: string;
+  convertedSize?: number;
 }
 
 interface FileTableProps {
@@ -33,6 +39,9 @@ const FileTable = ({ files, onRemove }: FileTableProps) => {
             </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
               목표 확장자
+            </th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+              진행 상황
             </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
               설정
@@ -63,6 +72,42 @@ const FileTable = ({ files, onRemove }: FileTableProps) => {
               </td>
               <td className="px-4 py-3 text-sm font-medium text-blue-600 text-center">
                 .{fileItem.targetExtension}
+              </td>
+              <td className="px-4 py-3">
+                <div className="flex items-center gap-2 justify-center">
+                  {fileItem.status === "converting" && (
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 text-blue-600 animate-spin flex-shrink-0" />
+                        <div className="flex-1">
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${fileItem.progress || 0}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {fileItem.progress || 0}%
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  {fileItem.status === "success" && (
+                    <span className="text-green-600 font-medium">✓ 완료</span>
+                  )}
+                  {fileItem.status === "error" && (
+                    <span
+                      className="text-red-600 text-sm"
+                      title={fileItem.error}
+                    >
+                      ✗ 실패
+                    </span>
+                  )}
+                  {fileItem.status === "pending" && (
+                    <span className="text-gray-400 text-sm">대기 중</span>
+                  )}
+                </div>
               </td>
               <td className="px-4 py-3 text-center">
                 <button className="text-gray-400 hover:text-gray-600 transition-colors">
