@@ -15,9 +15,15 @@ const useFileDrop = (onFilesDropped: FileDropHandler) => {
       setFileCount(count);
     };
 
-    const handleDragLeave = (event: DragEvent) => {
-      event.preventDefault();
-      setIsDragging(false);
+    const handleDragLeave = (e: DragEvent) => {
+      if (
+        e.clientX <= 0 ||
+        e.clientY <= 0 ||
+        e.clientX >= window.innerWidth ||
+        e.clientY >= window.innerHeight
+      ) {
+        setIsDragging(false);
+      }
     };
 
     const handleDrop = (event: DragEvent) => {
@@ -26,7 +32,7 @@ const useFileDrop = (onFilesDropped: FileDropHandler) => {
       setFileCount(0);
 
       const files = event.dataTransfer?.files;
-      if(!files || files.length === 0) return;
+      if (!files || files.length === 0) return;
 
       const fileArray = Array.from(files);
       onFilesDropped(fileArray);
