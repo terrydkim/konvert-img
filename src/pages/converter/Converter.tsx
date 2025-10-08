@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
+import ImageUploadIcon from "../../components/icons/ImageUploadIcon";
 import useFileDrop from "../../hooks/useFileDrop";
-import DropOverlay from './DropOverlay';
+import DropOverlay from "./DropOverlay";
 
 const Converter = () => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -8,7 +9,6 @@ const Converter = () => {
 
   const handleFilesAdded = (files: File[]) => {
     setSelectedFiles((prev) => [...prev, ...files]);
-    console.log("드롭된 파일", files);
   };
 
   const { isDragging, fileCount } = useFileDrop(handleFilesAdded);
@@ -19,8 +19,6 @@ const Converter = () => {
 
     const fileArray = Array.from(files);
     setSelectedFiles(fileArray);
-
-    console.log("선택된 파일", fileArray);
   };
 
   const handleUploadClick = () => {
@@ -28,29 +26,44 @@ const Converter = () => {
   };
 
   return (
-    <div>
-      Converter Page
-      <div>
-        <button onClick={handleUploadClick}>Select Files</button>
-        <input
-          type="file"
-          ref={fileInputRef}
-          multiple
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileSelect}
-        />
-      </div>
-      {selectedFiles.length > 0 && (
-        <div>
-          <h3>Selected Files:</h3>
-          <ul>
-            {selectedFiles.map((file, index) => (
-              <li key={index}>{file.name}</li>
-            ))}
-          </ul>
+    <div className="min-h-screen bg-gray-50 p-8">
+      <h1 className="text-4xl font-bold mb-6 text-center">Image Converter</h1>
+      <section className="mb-6 text-center bg-white p-6 rounded-lg shadow-md">
+        <div
+          className="rounded-lg border-2 border-dashed border-gray-300 p-6 cursor-pointer hover:bg-blue-50 hover:border-blue-500 transition-colors group"
+          onClick={handleUploadClick}
+        >
+          <div className="justify-center flex mb-4">
+            <ImageUploadIcon className="w-20 h-20 text-gray-400 group-hover:text-blue-500 transition-colors" />
+          </div>
+          <div className="gap-2 flex flex-col items-center">
+            <div>Drag and drop your images here</div>
+            <p className="text-gray-400 text-sm">or</p>
+            <div>Upload Files</div>
+          </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            multiple
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileSelect}
+          />
         </div>
-      )}
+      </section>
+      <section className="mb-6 text-left bg-white p-6 rounded-lg shadow-md">
+        {selectedFiles.length > 0 && (
+          <div>
+            <h3>Selected Files:</h3>
+            <ul>
+              {selectedFiles.map((file, index) => (
+                <li key={index}>{file.name}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </section>
+
       {isDragging && <DropOverlay fileCount={fileCount} />}
     </div>
   );
