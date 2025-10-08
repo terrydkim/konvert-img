@@ -1,6 +1,6 @@
 import Footer from './components/Footer';
 import Header from "./components/Header";
-import Converter from "./pages/Converter";
+import Converter from "./pages/converter/Converter";
 
 function App() {
   return (
