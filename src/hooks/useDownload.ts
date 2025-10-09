@@ -1,6 +1,12 @@
 import JSZip from "jszip";
 import type { FileItem } from "../types/types";
 
+export interface DownloadResult {
+  success: boolean;
+  count?: number;
+  error?: string;
+}
+
 const useDownload = () => {
   const downloadSingle = (fileItem: FileItem) => {
     if (!fileItem.convertedUrl) return;
@@ -16,14 +22,16 @@ const useDownload = () => {
     document.body.removeChild(link);
   };
 
-  const downloadZip = async (files: FileItem[]): Promise<boolean> => {
+  const downloadZip = async (files: FileItem[]): Promise<DownloadResult> => {
     const successFiles = files.filter(
       (file) => file.status === "success" && file.convertedBlob
     );
 
     if (successFiles.length === 0) {
-      alert("다운로드할 파일이 없습니다.");
-      return false;
+      return {
+        success: false,
+        error: "다운로드할 파일이 없습니다.",
+      };
     }
 
     try {
@@ -51,11 +59,16 @@ const useDownload = () => {
 
       URL.revokeObjectURL(link.href);
 
-      return true;
+      return {
+        success: true,
+        count: successFiles.length,
+      };
     } catch (error) {
       console.error("ZIP 생성 중 오류 발생:", error);
-      alert("ZIP 파일 생성 중 오류가 발생했습니다.");
-      return false;
+      return {
+        success: false,
+        error: "ZIP 파일 생성 중 오류가 발생했습니다.",
+      };
     }
   };
 

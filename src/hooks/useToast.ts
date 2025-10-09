@@ -1,27 +1,31 @@
 import { useState } from "react";
-interface RejectedFile {
-  name: string;
-  reason: string;
-}
+
+export type ToastVariant = "success" | "error" | "info" | "warning";
 
 export interface ToastType {
   id: string;
   message: string;
-  files: RejectedFile[];
+  variant: ToastVariant;
+  details?: string[];
+  duration?: number;
 }
 
 const useToast = () => {
   const [toasts, setToasts] = useState<ToastType[]>([]);
 
-  const showToast = (files: RejectedFile[]) => {
+  const showToast = (
+    message: string,
+    variant: ToastVariant = "info",
+    details?: string[],
+    duration: number = 5000
+  ) => {
     const id = crypto.randomUUID();
-    const message = `${files.length}개 파일 업로드 실패`;
 
-    setToasts((prev) => [...prev, { id, message, files }]);
+    setToasts((prev) => [...prev, { id, message, variant, details, duration }]);
 
     setTimeout(() => {
       removeToast(id);
-    }, 5000);
+    }, duration);
   };
 
   const removeToast = (id: string) => {

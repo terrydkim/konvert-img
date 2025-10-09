@@ -58,12 +58,12 @@ const Converter = () => {
     }
 
     if (invalid.length > 0) {
-      const rejectedFiles = invalid.map((item) => ({
-        name: item.file.name,
-        reason: item.reason,
-      }));
-      showToast(rejectedFiles);
-      console.log("거부된 파일:", invalid);
+      const details = invalid.map((item) => `${item.file.name} - ${item.reason}`);
+      showToast(
+        `${invalid.length}개 파일 업로드 실패`,
+        "error",
+        details
+      );
     }
   };
 
@@ -129,6 +129,19 @@ const Converter = () => {
         )
       );
     });
+  };
+
+  const handleDownloadZip = async () => {
+    const result = await downloadZip(selectedFiles);
+    if (result.success) {
+      showToast(`${result.count}개 파일 다운로드 완료`, "success");
+      return;
+    }
+
+    showToast(
+      result.error || "다운로드 실패",
+      result.error === "다운로드할 파일이 없습니다." ? "warning" : "error"
+    );
   };
 
   return (
@@ -198,7 +211,7 @@ const Converter = () => {
             </button>
             {successCount > 0 && (
               <button
-                onClick={() => downloadZip(selectedFiles)}
+                onClick={handleDownloadZip}
                 disabled={isConverting}
                 className="flex items-center justify-center gap-2 w-full my-2 px-4 md:px-6 py-2.5 md:py-3 rounded-lg text-sm md:text-base font-medium transition-colors
                 cursor-pointer bg-green-500 hover:bg-green-600 text-white"
