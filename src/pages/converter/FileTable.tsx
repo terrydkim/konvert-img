@@ -1,25 +1,14 @@
-import { Loader2, Settings, Trash2 } from "lucide-react";
+import { Download, Loader2, Settings, Trash2 } from "lucide-react";
+import type { FileItem } from "../../types/types";
 import { formatFileSize, getFileExtension } from "../../utils";
-
-export interface FileItem {
-  id: string;
-  file: File;
-  preview: string;
-  targetExtension: string;
-  status: "pending" | "converting" | "success" | "error";
-  progress?: number;
-  error?: string;
-  convertedBlob?: Blob;
-  convertedUrl?: string;
-  convertedSize?: number;
-}
 
 interface FileTableProps {
   files: FileItem[];
   onRemove: (id: string) => void;
+  onDownload: (fileItem: FileItem) => void;
 }
 
-const FileTable = ({ files, onRemove }: FileTableProps) => {
+const FileTable = ({ files, onRemove, onDownload }: FileTableProps) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       <table className="w-full">
@@ -42,6 +31,9 @@ const FileTable = ({ files, onRemove }: FileTableProps) => {
             </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
               진행 상황
+            </th>
+            <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+              다운로드
             </th>
             <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">
               설정
@@ -108,6 +100,22 @@ const FileTable = ({ files, onRemove }: FileTableProps) => {
                     <span className="text-gray-400 text-sm">대기 중</span>
                   )}
                 </div>
+              </td>
+              <td className="px-4 py-3 text-center">
+                <button
+                  onClick={() => onDownload(fileItem)}
+                  disabled={
+                    fileItem.status !== "success" || !fileItem.convertedUrl
+                  }
+                  className="cursor-pointer text-blue-600 hover:text-blue-800 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors inline-flex items-center gap-1"
+                  title={
+                    fileItem.status === "success"
+                      ? "다운로드"
+                      : "변환 완료 후 다운로드 가능"
+                  }
+                >
+                  <Download className="w-5 h-5" />
+                </button>
               </td>
               <td className="px-4 py-3 text-center">
                 <button className="text-gray-400 hover:text-gray-600 transition-colors">
