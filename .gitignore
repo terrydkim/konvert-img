@@ -13,6 +13,8 @@ dist-ssr
 *.local
 .serena
 CLAUDE.md
+.claude
+.env
 
 # Editor directories and files
 .vscode/*

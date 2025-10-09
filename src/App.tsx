@@ -1,11 +1,17 @@
+import Footer from './components/Footer';
+import Header from "./components/Header";
+import Converter from "./pages/converter/Converter";
 
 function App() {
-
   return (
     <>
-      <h1>Hello Vite + React!</h1>
+      <Header />
+      <main>
+        <Converter />
+      </main>
+      <Footer/> 
     </>
-  )
+  );
 }
 
-export default App
+export default App;
