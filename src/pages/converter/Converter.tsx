@@ -132,16 +132,16 @@ const Converter = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-6 text-center">이미지 변환기</h1>
-      <section className="mb-6 text-center bg-white p-6 rounded-lg shadow-md">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 xl:p-10">
+      <div className="max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto">
+      <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-center">이미지 변환기</h1>
+      <section className="mb-4 md:mb-6 text-center bg-white p-4 sm:p-6 rounded-lg shadow-md">
         <div
-          className="rounded-lg border-2 border-dashed border-gray-300 p-6 cursor-pointer hover:bg-blue-50 hover:border-blue-500 transition-colors group"
+          className="rounded-lg border-2 border-dashed border-gray-300 p-4 sm:p-6 cursor-pointer hover:bg-blue-50 hover:border-blue-500 transition-colors group"
           onClick={handleUploadClick}
         >
-          <div className="justify-center flex mb-4">
-            <ImageUploadIcon className="w-20 h-20 text-gray-400 group-hover:text-blue-500 transition-colors" />
+          <div className="justify-center flex mb-3 md:mb-4">
+            <ImageUploadIcon className="w-16 h-16 sm:w-20 sm:h-20 text-gray-400 group-hover:text-blue-500 transition-colors" />
           </div>
           <div className="gap-2 flex flex-col items-center">
             <div>이미지를 드래그하세요.</div>
@@ -162,14 +162,14 @@ const Converter = () => {
         </div>
       </section>
       {selectedFiles.length > 0 ? (
-        <section className="mb-6 text-left bg-white p-6 rounded-lg shadow-md">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-700">
+        <section className="mb-4 md:mb-6 text-left bg-white p-4 sm:p-6 rounded-lg shadow-md">
+          <div className="flex items-center justify-between mb-3 md:mb-4">
+            <h2 className="text-base md:text-lg font-semibold text-gray-700">
               파일 목록 ({selectedFiles.length}개)
             </h2>
             <button
               onClick={resetAll}
-              className="px-4 py-2 text-sm font-medium cursor-pointer text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              className="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium cursor-pointer text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
             >
               전체 초기화
             </button>
@@ -180,11 +180,11 @@ const Converter = () => {
             onDownload={downloadSingle}
           />
           {/* 변환 버튼 */}
-          <div className="mt-4">
+          <div className="mt-3 md:mt-4">
             <button
               onClick={handleConvert}
               disabled={isConverting || convertibleCount === 0}
-              className={`w-full py-3 rounded-lg font-medium text-white  transition-colors ${
+              className={`w-full py-2.5 md:py-3 rounded-lg text-sm md:text-base font-medium text-white transition-colors ${
                 isConverting || convertibleCount === 0
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-500 hover:bg-blue-600  cursor-pointer"
@@ -200,31 +200,31 @@ const Converter = () => {
               <button
                 onClick={() => downloadZip(selectedFiles)}
                 disabled={isConverting}
-                className="flex items-center justify-center gap-2 w-full my-2 px-6 py-3 rounded-lg font-medium transition-colors 
+                className="flex items-center justify-center gap-2 w-full my-2 px-4 md:px-6 py-2.5 md:py-3 rounded-lg text-sm md:text-base font-medium transition-colors
                 cursor-pointer bg-green-500 hover:bg-green-600 text-white"
               >
-                <Download className="w-5 h-5" />
+                <Download className="w-4 h-4 md:w-5 md:h-5" />
                 <div>전체 다운로드 (ZIP) {successCount}개</div>
               </button>
             )}
           </div>
         </section>
       ) : (
-        <section className="mb-6 bg-white p-8 rounded-lg shadow-md">
+        <section className="mb-4 md:mb-6 bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-md">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
+            <h2 className="text-xl md:text-2xl font-bold text-center text-gray-800 mb-6 md:mb-8">
               이미지 변환기 사용법
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                  <ImageIcon className="w-8 h-8 text-blue-600" />
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3 md:mb-4">
+                  <ImageIcon className="w-6 h-6 md:w-8 md:h-8 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-2">
                   확장자 변환
                 </h3>
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-600 text-xs md:text-sm">
                   이미지 확장자를
                   <br />
                   간편하게 변경해보세요
@@ -232,13 +232,13 @@ const Converter = () => {
               </div>
 
               <div className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                  <Sliders className="w-8 h-8 text-green-600" />
+                <div className="w-12 h-12 md:w-16 md:h-16 bg-green-100 rounded-full flex items-center justify-center mb-3 md:mb-4">
+                  <Sliders className="w-6 h-6 md:w-8 md:h-8 text-green-600" />
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                <h3 className="text-base md:text-lg font-semibold text-gray-800 mb-2">
                   크기 및 용량 설정
                 </h3>
-                <p className="text-gray-600 text-sm">
+                <p className="text-gray-600 text-xs md:text-sm">
                   이미지 크기와 용량을
                   <br />
                   자유롭게 조절할 수 있습니다
@@ -247,8 +247,8 @@ const Converter = () => {
             </div>
 
             {/* 시작 안내 */}
-            <div className="mt-8 text-center">
-              <p className="text-gray-500 text-sm">
+            <div className="mt-6 md:mt-8 text-center">
+              <p className="text-gray-500 text-xs md:text-sm">
                 위에서 이미지를 업로드하여 시작하세요
               </p>
             </div>
