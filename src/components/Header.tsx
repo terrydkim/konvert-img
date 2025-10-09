@@ -1,4 +1,4 @@
-import ConverterIcon from "./icons/converterIcon";
+import ConverterIcon from "./icons/ConverterIcon";
 
 export default function Header() {
   return (
