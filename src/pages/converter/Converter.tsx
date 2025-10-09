@@ -28,6 +28,18 @@ const Converter = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toasts, showToast, removeToast } = useToast();
 
+  const { isConverting, startConversion } = useImageConverter();
+
+  const { downloadSingle, downloadZip } = useDownload();
+
+  const successCount = selectedFiles.filter(
+    (f) => f.status === "success"
+  ).length;
+
+  const convertibleCount = selectedFiles.filter(
+    (f) => f.status === "pending" || f.status === "error"
+  ).length;
+
   const handleFilesAdded = (files: File[]) => {
     const { valid, invalid } = validateFiles(
       files,
@@ -63,6 +75,21 @@ const Converter = () => {
     });
   };
 
+  const resetAll = () => {
+    const confirmed = window.confirm(
+      `정말로 ${selectedFiles.length}개의 파일을 모두 삭제하시겠습니까?`
+    );
+
+    if (!confirmed) return;
+
+    selectedFiles.forEach((file) => {
+      URL.revokeObjectURL(file.preview);
+      if (file.convertedUrl) URL.revokeObjectURL(file.convertedUrl);
+    });
+    setSelectedFiles([]);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const { isDragging, fileCount } = useFileDrop(handleFilesAdded);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,8 +103,6 @@ const Converter = () => {
   const handleUploadClick = () => {
     fileInputRef.current?.click();
   };
-
-  const { isConverting, startConversion } = useImageConverter();
 
   const handleConvert = () => {
     const filesToConvert = selectedFiles
@@ -105,12 +130,6 @@ const Converter = () => {
       );
     });
   };
-
-  const { downloadSingle, downloadZip } = useDownload();
-
-  const successCount = selectedFiles.filter(
-    (f) => f.status === "success"
-  ).length;
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -143,6 +162,17 @@ const Converter = () => {
       </section>
       {selectedFiles.length > 0 && (
         <section className="mb-6 text-left bg-white p-6 rounded-lg shadow-md">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-700">
+              파일 목록 ({selectedFiles.length}개)
+            </h2>
+            <button
+              onClick={resetAll}
+              className="px-4 py-2 text-sm font-medium cursor-pointer text-red-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            >
+              전체 초기화
+            </button>
+          </div>
           <FileTable
             files={selectedFiles}
             onRemove={removeFile}
@@ -152,20 +182,23 @@ const Converter = () => {
           <div className="mt-4">
             <button
               onClick={handleConvert}
-              disabled={isConverting}
-              className={`w-full py-3 rounded-lg font-medium transition-colors cursor-pointer ${
-                isConverting
+              disabled={isConverting || convertibleCount === 0}
+              className={`w-full py-3 rounded-lg font-medium text-white  transition-colors ${
+                isConverting || convertibleCount === 0
                   ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-600 text-white"
+                  : "bg-blue-500 hover:bg-blue-600  cursor-pointer"
               }`}
             >
               {isConverting
                 ? `변환 중... `
-                : `${selectedFiles.length}개 파일 변환하기`}
+                : convertibleCount === 0
+                ? "변환할 파일 없음"
+                : `${convertibleCount}개 파일 변환하기`}
             </button>
             {successCount > 0 && (
               <button
                 onClick={() => downloadZip(selectedFiles)}
+                disabled={isConverting}
                 className="flex items-center justify-center gap-2 w-full my-2 px-6 py-3 rounded-lg font-medium transition-colors 
                 cursor-pointer bg-green-500 hover:bg-green-600 text-white"
               >
