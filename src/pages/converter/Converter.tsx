@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import ImageUploadIcon from "../../components/icons/ImageUploadIcon";
 import useFileDrop from "../../hooks/useFileDrop";
 
-import { Download } from "lucide-react";
+import { Download, ImageIcon, Sliders } from "lucide-react";
 import Toast from "../../components/Toast";
 import useDownload from "../../hooks/useDownload";
 import useImageConverter, {
@@ -133,7 +133,7 @@ const Converter = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <h1 className="text-4xl font-bold mb-6 text-center">Image Converter</h1>
+      <h1 className="text-4xl font-bold mb-6 text-center">이미지 변환기</h1>
       <section className="mb-6 text-center bg-white p-6 rounded-lg shadow-md">
         <div
           className="rounded-lg border-2 border-dashed border-gray-300 p-6 cursor-pointer hover:bg-blue-50 hover:border-blue-500 transition-colors group"
@@ -160,7 +160,7 @@ const Converter = () => {
           />
         </div>
       </section>
-      {selectedFiles.length > 0 && (
+      {selectedFiles.length > 0 ? (
         <section className="mb-6 text-left bg-white p-6 rounded-lg shadow-md">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg font-semibold text-gray-700">
@@ -206,6 +206,51 @@ const Converter = () => {
                 <div>전체 다운로드 (ZIP) {successCount}개</div>
               </button>
             )}
+          </div>
+        </section>
+      ) : (
+        <section className="mb-6 bg-white p-8 rounded-lg shadow-md">
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold text-center text-gray-800 mb-8">
+              이미지 변환기 사용법
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                  <ImageIcon className="w-8 h-8 text-blue-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  확장자 변환
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  이미지 확장자를
+                  <br />
+                  간편하게 변경해보세요
+                </p>
+              </div>
+
+              <div className="flex flex-col items-center text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                  <Sliders className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                  크기 및 용량 설정
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  이미지 크기와 용량을
+                  <br />
+                  자유롭게 조절할 수 있습니다
+                </p>
+              </div>
+            </div>
+
+            {/* 시작 안내 */}
+            <div className="mt-8 text-center">
+              <p className="text-gray-500 text-sm">
+                위에서 이미지를 업로드하여 시작하세요
+              </p>
+            </div>
           </div>
         </section>
       )}
