@@ -133,6 +133,7 @@ const Converter = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-4xl mx-auto">
       <h1 className="text-4xl font-bold mb-6 text-center">이미지 변환기</h1>
       <section className="mb-6 text-center bg-white p-6 rounded-lg shadow-md">
         <div
@@ -261,6 +262,7 @@ const Converter = () => {
         {toasts.map((toast) => (
           <Toast key={toast.id} toast={toast} onRemove={removeToast} />
         ))}
+      </div>
       </div>
     </div>
   );
