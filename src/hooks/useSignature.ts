@@ -247,6 +247,7 @@ const useSignature = (options: SignatureOptions = {}): UseSignatureReturn => {
       }, "image/png");
     });
   }, []);
+  
   // 비어있는지 확인
   const isEmpty = useCallback((): boolean => {
     const canvas = canvasRef.current;
