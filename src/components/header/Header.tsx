@@ -57,7 +57,7 @@ export default function Header() {
             </ul>
           </nav>
           <HamburgerMenu
-            className="col-start-2 justify-self-end md:col-start-3"
+            className="col-start-2 justify-self-end md:hidden"
             links={[
               { to: "/", label: "이미지 변환" },
               { to: "/remove-background", label: "배경 제거" },
