@@ -4,10 +4,10 @@ import useToast from "../../hooks/useToast";
 
 const Signature = () => {
   const { canvasRef, clear, toBlob, isEmpty, undo, canUndo } = useSignature({
-    width: 800,
-    height: 400,
+    width: 400,
+    height: 200,
     strokeColor: "#000000",
-    strokeWidth: 2,
+    strokeWidth: 5,
   });
 
   const { toasts, showToast, removeToast } = useToast();
@@ -41,7 +41,7 @@ const Signature = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 ">
-      <div className="max-w-2xl md:max-w-3xl lg:max-w-4xl mx-auto">
+        <div className="max-w-2xl md:max-w-xl lg:max-w-2xl mx-auto">
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-center text-gray-800">
           온라인 서명
         </h1>
@@ -52,11 +52,10 @@ const Signature = () => {
           </p>
 
           {/* Canvas 영역 */}
-          <div className="border-2 border-gray-300 rounded-lg overflow-hidden mb-4">
+          <div className="border-2 border-gray-300 rounded-lg overflow-hidden mb-4 w-full max-w-[400px] mx-auto">
             <canvas
               ref={canvasRef}
-              className="w-full h-auto touch-none cursor-crosshair"
-              style={{ maxWidth: "100%" }}
+              className="touch-none cursor-crosshair block w-full"
             />
           </div>
 
