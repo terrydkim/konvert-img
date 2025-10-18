@@ -11,17 +11,8 @@ import useDownload from "../../hooks/useDownload";
 import useToast from "../../hooks/useToast";
 import validateFiles from "../../hooks/validateFiles";
 import type { FileItem } from "../../types/types";
-import { isMobile } from "../../utils";
-import {
-  MAX_SIZE_TOOLTIP_DESKTOP,
-  MAX_SIZE_TOOLTIP_MOBILE,
-} from "../../utils/const";
 import DropOverlay from "../converter/DropOverlay";
 import FileTable from "../converter/FileTable";
-
-const maxSizeToolTip = isMobile()
-  ? MAX_SIZE_TOOLTIP_MOBILE
-  : MAX_SIZE_TOOLTIP_DESKTOP;
 
 const RemoveBackground = () => {
   const [selectedFiles, setSelectedFiles] = useState<FileItem[]>([]);
@@ -58,12 +49,10 @@ const RemoveBackground = () => {
     }
 
     if (invalid.length > 0) {
-      const details = invalid.map((item) => `${item.file.name} - ${item.reason}`);
-      showToast(
-        `${invalid.length}개 파일 업로드 실패`,
-        "error",
-        details
+      const details = invalid.map(
+        (item) => `${item.file.name} - ${item.reason}`
       );
+      showToast(`${invalid.length}개 파일 업로드 실패`, "error", details);
     }
   };
 
@@ -161,9 +150,6 @@ const RemoveBackground = () => {
               <div>이미지를 드래그하세요.</div>
               <p className="text-gray-400 text-sm">또는</p>
               <div>파일을 업로드하세요.</div>
-              <p className="mt-1 text-xs text-gray-400">
-                최대 {maxSizeToolTip} (개당 100MB)
-              </p>
             </div>
             <input
               type="file"
