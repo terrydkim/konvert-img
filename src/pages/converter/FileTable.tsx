@@ -87,7 +87,7 @@ const FileTable = ({
               )}
               <td className="px-2 md:px-4 py-2 md:py-3">
                 <div className="flex items-center gap-2 justify-center">
-                  {(fileItem.status === "converting" || fileItem.status === "removing") && (
+                  {fileItem.status === "converting" && (
                     <div className="flex-1">
                       <div className="flex items-center gap-1 md:gap-2">
                         <Loader2 className="w-3 h-3 md:w-4 md:h-4 text-blue-600 animate-spin flex-shrink-0" />
@@ -103,6 +103,12 @@ const FileTable = ({
                           </p>
                         </div>
                       </div>
+                    </div>
+                  )}
+                  {fileItem.status === "removing" && (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 md:w-5 md:h-5 text-purple-600 animate-spin" />
+                      <span className="text-purple-600 text-xs md:text-sm font-medium">처리 중</span>
                     </div>
                   )}
                   {fileItem.status === "success" && (

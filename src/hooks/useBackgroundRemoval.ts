@@ -15,7 +15,6 @@ export interface RemovalResult {
 export interface RemovalProgress {
   id: string;
   status: RemovalStatus;
-  progress: number; // 0 - 100
   result?: RemovalResult;
   error?: string;
 }
@@ -26,6 +25,7 @@ const useBackgroundRemoval = () => {
   const progressCallbackRef = useRef<
     ((progress: RemovalProgress) => void) | null
   >(null);
+  const completionResolversRef = useRef<Map<string, () => void>>(new Map());
 
   // Worker 초기화
   useEffect(() => {
@@ -37,37 +37,41 @@ const useBackgroundRemoval = () => {
 
     // Worker 메시지 핸들러
     workerRef.current.onmessage = (event: MessageEvent<WorkerResponse>) => {
-      const { type, id, progress, buffer, error } = event.data;
+      const { type, id, buffer, error } = event.data;
 
       if (!progressCallbackRef.current) return;
 
-      if (type === "progress" && progress !== undefined) {
-        progressCallbackRef.current({
-          id,
-          status: "removing",
-          progress,
-        });
-      } else if (type === "success" && buffer) {
+      if (type === "success" && buffer) {
         // ArrayBuffer를 Blob으로 변환
         const blob = new Blob([buffer], { type: "image/png" });
         const url = URL.createObjectURL(blob);
         progressCallbackRef.current({
           id,
           status: "success",
-          progress: 100,
           result: {
             blob,
             url,
             size: blob.size,
           },
         });
+        // 완료 처리
+        const resolver = completionResolversRef.current.get(id);
+        if (resolver) {
+          resolver();
+          completionResolversRef.current.delete(id);
+        }
       } else if (type === "error") {
         progressCallbackRef.current({
           id,
           status: "error",
-          progress: 0,
           error: error || "알 수 없는 오류",
         });
+        // 에러도 완료로 처리
+        const resolver = completionResolversRef.current.get(id);
+        if (resolver) {
+          resolver();
+          completionResolversRef.current.delete(id);
+        }
       }
     };
 
@@ -97,7 +101,7 @@ const useBackgroundRemoval = () => {
 
     for (const { id, file } of files) {
       // 초기 상태 전송
-      onProgress({ id, status: "removing", progress: 0 });
+      onProgress({ id, status: "removing" });
 
       // File을 ArrayBuffer로 변환
       const buffer = await file.arrayBuffer();
@@ -111,21 +115,15 @@ const useBackgroundRemoval = () => {
         id,
       };
 
+      // 완료를 기다리기 위한 Promise 등록
+      const completionPromise = new Promise<void>((resolve) => {
+        completionResolversRef.current.set(id, resolve);
+      });
+
       workerRef.current.postMessage(message, { transfer: [buffer] });
 
-      // Worker가 비동기로 처리하므로, 완료를 기다림
-      await new Promise<void>((resolve) => {
-        const originalCallback = progressCallbackRef.current;
-        progressCallbackRef.current = (progress) => {
-          originalCallback?.(progress);
-          if (
-            progress.id === id &&
-            (progress.status === "success" || progress.status === "error")
-          ) {
-            resolve();
-          }
-        };
-      });
+      // 완료 대기
+      await completionPromise;
     }
 
     setIsRemoving(false);

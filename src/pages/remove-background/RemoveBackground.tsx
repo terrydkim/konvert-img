@@ -2,12 +2,12 @@ import { useRef, useState } from "react";
 import ImageUploadIcon from "../../components/icons/ImageUploadIcon";
 import useFileDrop from "../../hooks/useFileDrop";
 
-import { Download, Sparkles, ImageOff } from "lucide-react";
+import { Download, ImageOff, Sparkles } from "lucide-react";
 import Toast from "../../components/Toast";
-import useDownload from "../../hooks/useDownload";
 import useBackgroundRemoval, {
   type RemovalProgress,
 } from "../../hooks/useBackgroundRemoval";
+import useDownload from "../../hooks/useDownload";
 import useToast from "../../hooks/useToast";
 import validateFiles from "../../hooks/validateFiles";
 import type { FileItem } from "../../types/types";
@@ -114,19 +114,18 @@ const RemoveBackground = () => {
 
     startBackgroundRemoval(filesToProcess, (progressData: RemovalProgress) => {
       setSelectedFiles((prev) =>
-        prev.map((file) =>
-          file.id === progressData.id
-            ? {
-                ...file,
-                status: progressData.status,
-                progress: progressData.progress,
-                convertedBlob: progressData.result?.blob,
-                convertedUrl: progressData.result?.url,
-                convertedSize: progressData.result?.size,
-                error: progressData.error,
-              }
-            : file
-        )
+        prev.map((file) => {
+          if (file.id !== progressData.id) return file;
+
+          return {
+            ...file,
+            status: progressData.status,
+            convertedBlob: progressData.result?.blob,
+            convertedUrl: progressData.result?.url,
+            convertedSize: progressData.result?.size,
+            error: progressData.error,
+          };
+        })
       );
     });
   };
