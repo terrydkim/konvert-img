@@ -6,9 +6,19 @@ interface FileTableProps {
   files: FileItem[];
   onRemove: (id: string) => void;
   onDownload: (fileItem: FileItem) => void;
+  showCurrentExtension?: boolean;
+  showTargetExtension?: boolean;
+  showSettings?: boolean;
 }
 
-const FileTable = ({ files, onRemove, onDownload }: FileTableProps) => {
+const FileTable = ({
+  files,
+  onRemove,
+  onDownload,
+  showCurrentExtension = true,
+  showTargetExtension = true,
+  showSettings = true
+}: FileTableProps) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden overflow-x-auto">
       <table className="w-full min-w-max">
@@ -23,21 +33,27 @@ const FileTable = ({ files, onRemove, onDownload }: FileTableProps) => {
             <th className="px-2 md:px-4 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase hidden md:table-cell">
               파일 크기
             </th>
-            <th className="px-2 md:px-4 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">
-              현재 확장자
-            </th>
-            <th className="px-2 md:px-4 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase">
-              목표 확장자
-            </th>
+            {showCurrentExtension && (
+              <th className="px-2 md:px-4 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">
+                현재 확장자
+              </th>
+            )}
+            {showTargetExtension && (
+              <th className="px-2 md:px-4 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                목표 확장자
+              </th>
+            )}
             <th className="px-2 md:px-4 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase">
               진행 상황
             </th>
             <th className="px-2 md:px-4 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase">
               다운로드
             </th>
-            <th className="px-2 md:px-4 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">
-              설정
-            </th>
+            {showSettings && (
+              <th className="px-2 md:px-4 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase hidden lg:table-cell">
+                설정
+              </th>
+            )}
             <th className="px-2 md:px-4 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase">
               제거
             </th>
@@ -59,15 +75,19 @@ const FileTable = ({ files, onRemove, onDownload }: FileTableProps) => {
               <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm text-gray-600 text-center hidden md:table-cell">
                 {formatFileSize(fileItem.file.size)}
               </td>
-              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm text-gray-600 text-center hidden lg:table-cell">
-                .{getFileExtension(fileItem.file.name)}
-              </td>
-              <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm font-medium text-blue-600 text-center">
-                .{fileItem.targetExtension}
-              </td>
+              {showCurrentExtension && (
+                <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm text-gray-600 text-center hidden lg:table-cell">
+                  .{getFileExtension(fileItem.file.name)}
+                </td>
+              )}
+              {showTargetExtension && (
+                <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm font-medium text-blue-600 text-center">
+                  .{fileItem.targetExtension}
+                </td>
+              )}
               <td className="px-2 md:px-4 py-2 md:py-3">
                 <div className="flex items-center gap-2 justify-center">
-                  {fileItem.status === "converting" && (
+                  {(fileItem.status === "converting" || fileItem.status === "removing") && (
                     <div className="flex-1">
                       <div className="flex items-center gap-1 md:gap-2">
                         <Loader2 className="w-3 h-3 md:w-4 md:h-4 text-blue-600 animate-spin flex-shrink-0" />
@@ -117,11 +137,13 @@ const FileTable = ({ files, onRemove, onDownload }: FileTableProps) => {
                   <Download className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
               </td>
-              <td className="px-2 md:px-4 py-2 md:py-3 text-center hidden lg:table-cell">
-                <button className="text-gray-400 hover:text-gray-600 transition-colors">
-                  <Settings className="w-4 h-4 md:w-5 md:h-5" />
-                </button>
-              </td>
+              {showSettings && (
+                <td className="px-2 md:px-4 py-2 md:py-3 text-center hidden lg:table-cell">
+                  <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <Settings className="w-4 h-4 md:w-5 md:h-5" />
+                  </button>
+                </td>
+              )}
               <td className="px-2 md:px-4 py-2 md:py-3 text-center">
                 <button
                   onClick={() => onRemove(fileItem.id)}

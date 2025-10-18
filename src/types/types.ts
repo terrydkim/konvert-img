@@ -3,7 +3,7 @@ export interface FileItem {
   file: File;
   preview: string;
   targetExtension: string;
-  status: "pending" | "converting" | "success" | "error";
+  status: "pending" | "converting" | "removing" | "success" | "error";
   progress?: number;
   error?: string;
   convertedBlob?: Blob;
