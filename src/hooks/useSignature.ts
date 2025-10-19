@@ -66,21 +66,52 @@ const useSignature = (options: SignatureOptions = {}): UseSignatureReturn => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    const dpr = window.devicePixelRatio || 1;
+    const resizeCanvas = () => {
+      const dpr = window.devicePixelRatio || 1;
 
-    // CSS 크기
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
+      // 부모 컨테이너의 실제 너비를 가져옴
+      const parent = canvas.parentElement;
+      if (!parent) return;
 
-    // 실제 캔버스 크기
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
+      const parentWidth = parent.clientWidth;
 
-    // 컨텍스트 스케일링
-    ctx.scale(dpr, dpr);
+      // 종횡비 유지 (2:1)
+      const aspectRatio = width / height;
 
-    setContext(ctx);
-  }, [width, height]);
+      // 실제 CSS 크기 계산 (최대 크기 제한)
+      const displayWidth = Math.min(parentWidth, width);
+      const displayHeight = displayWidth / aspectRatio;
+
+      // CSS 표시 크기 설정
+      canvas.style.width = `${displayWidth}px`;
+      canvas.style.height = `${displayHeight}px`;
+
+      // 실제 캔버스 크기 (고해상도 대응)
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+
+      // 컨텍스트 스케일링 (좌표계를 CSS 픽셀 기준으로 변환)
+      ctx.scale(dpr, dpr);
+
+      // 스타일 설정 (scale 이후에 설정해야 함)
+      ctx.strokeStyle = strokeColor;
+      ctx.lineWidth = strokeWidth;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.fillStyle = strokeColor;
+
+      setContext(ctx);
+    };
+
+    resizeCanvas();
+
+    // 윈도우 리사이즈 이벤트 리스너
+    window.addEventListener("resize", resizeCanvas);
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+    };
+  }, [width, height, strokeColor, strokeWidth]);
 
   // 스타일 설정 및 초기 히스토리 저장
   useEffect(() => {
