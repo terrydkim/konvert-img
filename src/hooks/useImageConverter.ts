@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { ImageSettings } from "../types/types";
 
 export type FileStatus = "pending" | "converting" | "success" | "error";
 
@@ -16,6 +17,11 @@ export interface ConversionProgress {
   error?: string;
 }
 
+export interface ConversionOptions {
+  targetExtension: string;
+  settings?: ImageSettings;
+}
+
 const PROGRESS = {
   START: 10,
   IMAGE_LOADED: 33,
@@ -24,13 +30,14 @@ const PROGRESS = {
   COMPLETE: 100,
 } as const;
 
-const QUALITY = 0.8;
+const DEFAULT_QUALITY = 0.8;
 
 const useImageConverter = () => {
   const [isConverting, setIsConverting] = useState(false);
 
   const convertImages = async (
     file: File,
+    options: ConversionOptions,
     onProgress: (progress: number) => void
   ): Promise<Blob> => {
     return new Promise((resolve, reject) => {
@@ -41,10 +48,19 @@ const useImageConverter = () => {
 
       img.onload = () => {
         onProgress(PROGRESS.IMAGE_LOADED);
+
+        // 설정에서 크기와 품질 가져오기
+        const quality = options.settings?.quality
+          ? options.settings.quality / 100
+          : DEFAULT_QUALITY;
+
+        const targetWidth = options.settings?.width ?? img.width;
+        const targetHeight = options.settings?.height ?? img.height;
+
         // canvas 만들기
         const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
 
         // 이미지 그리기
         const ctx = canvas.getContext("2d");
@@ -54,11 +70,14 @@ const useImageConverter = () => {
           return;
         }
 
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
         URL.revokeObjectURL(url);
         onProgress(PROGRESS.CANVAS_DRAWN);
 
-        // WebP로 변환
+        // 확장자에 맞는 MIME 타입 결정
+        const mimeType = `image/${options.targetExtension === 'jpg' ? 'jpeg' : options.targetExtension}`;
+
+        // 이미지 변환
         canvas.toBlob(
           (blob) => {
             onProgress(PROGRESS.BLOB_CREATING);
@@ -68,8 +87,8 @@ const useImageConverter = () => {
               reject(new Error("이미지 변환에 실패했습니다."));
             }
           },
-          "image/webp",
-          QUALITY
+          mimeType,
+          quality
         );
       };
 
@@ -84,15 +103,15 @@ const useImageConverter = () => {
 
   // 전체 파일 변환하기
   const startConversion = async (
-    files: { id: string; file: File }[],
+    files: { id: string; file: File; options: ConversionOptions }[],
     onProgress: (progress: ConversionProgress) => void
   ) => {
     setIsConverting(true);
 
-    for (const { id, file } of files) {
+    for (const { id, file, options } of files) {
       onProgress({ id, status: "converting", progress: 0 });
       try {
-        const blob = await convertImages(file, (progress) => {
+        const blob = await convertImages(file, options, (progress) => {
           onProgress({ id, status: "converting", progress });
         });
 
