@@ -1,3 +1,10 @@
+export interface ImageSettings {
+  quality: number; // 1-100
+  width?: number;
+  height?: number;
+  maintainAspectRatio: boolean;
+}
+
 export interface FileItem {
   id: string;
   file: File;
@@ -9,4 +16,5 @@ export interface FileItem {
   convertedBlob?: Blob;
   convertedUrl?: string;
   convertedSize?: number;
+  settings?: ImageSettings;
 }

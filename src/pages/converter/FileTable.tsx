@@ -6,6 +6,8 @@ interface FileTableProps {
   files: FileItem[];
   onRemove: (id: string) => void;
   onDownload: (fileItem: FileItem) => void;
+  onSettings?: (fileId: string) => void;
+  onExtensionChange?: (fileId: string, extension: string) => void;
   showCurrentExtension?: boolean;
   showTargetExtension?: boolean;
   showSettings?: boolean;
@@ -15,6 +17,8 @@ const FileTable = ({
   files,
   onRemove,
   onDownload,
+  onSettings,
+  onExtensionChange,
   showCurrentExtension = true,
   showTargetExtension = true,
   showSettings = true
@@ -81,8 +85,16 @@ const FileTable = ({
                 </td>
               )}
               {showTargetExtension && (
-                <td className="px-2 md:px-4 py-2 md:py-3 text-xs md:text-sm font-medium text-blue-600 text-center">
-                  .{fileItem.targetExtension}
+                <td className="px-2 md:px-4 py-2 md:py-3 text-center">
+                  <select
+                    value={fileItem.targetExtension}
+                    onChange={(e) => onExtensionChange?.(fileItem.id, e.target.value)}
+                    className="px-2 py-1 text-xs md:text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded cursor-pointer hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="webp">webp</option>
+                    <option value="png">png</option>
+                    <option value="jpg">jpg</option>
+                  </select>
                 </td>
               )}
               <td className="px-2 md:px-4 py-2 md:py-3">
@@ -145,7 +157,10 @@ const FileTable = ({
               </td>
               {showSettings && (
                 <td className="px-2 md:px-4 py-2 md:py-3 text-center hidden lg:table-cell">
-                  <button className="text-gray-400 hover:text-gray-600 transition-colors">
+                  <button
+                    onClick={() => onSettings?.(fileItem.id)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                  >
                     <Settings className="w-4 h-4 md:w-5 md:h-5" />
                   </button>
                 </td>

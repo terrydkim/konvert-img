@@ -54,11 +54,11 @@ const HamburgerMenu = ({
   const bp = bpToClass(breakpoint);
 
   return (
-    <div className={`justify-self-end ${bp}:hidden ${className}`}>
+    <div className={`${bp}:hidden ${className}`}>
       <button
         ref={btnRef}
         type="button"
-        className={`inline-flex ${bp}:hidden items-center justify-center rounded-md p-2 text-white/90 hover:text-white hover:bg-white/10 
+        className={`flex ${bp}:hidden items-center justify-self-end rounded-md p-2 text-white/90 hover:text-white hover:bg-white/10
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60`}
         aria-label={open ? "메뉴 닫기" : "메뉴 열기"}
         aria-expanded={open ? true : false}

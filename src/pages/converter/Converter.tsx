@@ -10,7 +10,7 @@ import useImageConverter, {
 } from "../../hooks/useImageConverter";
 import useToast from "../../hooks/useToast";
 import validateFiles from "../../hooks/validateFiles";
-import type { FileItem } from "../../types/types";
+import type { FileItem, ImageSettings } from "../../types/types";
 import { isMobile } from "../../utils";
 import {
   MAX_SIZE_TOOLTIP_DESKTOP,
@@ -18,6 +18,7 @@ import {
 } from "../../utils/const";
 import DropOverlay from "./DropOverlay";
 import FileTable from "./FileTable";
+import ImageSettingsModal from "./ImageSettingsModal";
 
 const maxSizeToolTip = isMobile()
   ? MAX_SIZE_TOOLTIP_MOBILE
@@ -31,6 +32,14 @@ const Converter = () => {
   const { isConverting, startConversion } = useImageConverter();
 
   const { downloadSingle, downloadZip } = useDownload();
+
+  // 모달 상태 관리
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [editingFileId, setEditingFileId] = useState<string | null>(null);
+  const [editingFileImageDimensions, setEditingFileImageDimensions] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
 
   const successCount = selectedFiles.filter(
     (f) => f.status === "success"
@@ -110,6 +119,10 @@ const Converter = () => {
       .map((f) => ({
         id: f.id,
         file: f.file,
+        options: {
+          targetExtension: f.targetExtension,
+          settings: f.settings,
+        },
       }));
 
     startConversion(filesToConvert, (progressData: ConversionProgress) => {
@@ -141,6 +154,61 @@ const Converter = () => {
     showToast(
       result.error || "다운로드 실패",
       result.error === "다운로드할 파일이 없습니다." ? "warning" : "error"
+    );
+  };
+
+  // 설정 버튼 클릭 핸들러
+  const handleOpenSettings = (fileId: string) => {
+    const file = selectedFiles.find((f) => f.id === fileId);
+    if (!file) return;
+
+    // 이미지 실제 크기를 가져오기 위해 Image 객체 사용
+    const img = new Image();
+    img.onload = () => {
+      setEditingFileImageDimensions({
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+      });
+      setEditingFileId(fileId);
+      setIsSettingsModalOpen(true);
+    };
+    img.src = file.preview;
+  };
+
+  // 설정 저장 핸들러
+  const handleSaveSettings = (settings: ImageSettings) => {
+    if (!editingFileId) return;
+
+    setSelectedFiles((prev) =>
+      prev.map((file) =>
+        file.id === editingFileId
+          ? { ...file, settings }
+          : file
+      )
+    );
+
+    setEditingFileId(null);
+    setEditingFileImageDimensions(null);
+  };
+
+  // 모달 닫기 핸들러
+  const handleCloseModal = () => {
+    setIsSettingsModalOpen(false);
+    setEditingFileId(null);
+    setEditingFileImageDimensions(null);
+  };
+
+  // 현재 편집 중인 파일 찾기
+  const editingFile = editingFileId
+    ? selectedFiles.find((f) => f.id === editingFileId)
+    : null;
+
+  // 확장자 변경 핸들러
+  const handleExtensionChange = (fileId: string, extension: string) => {
+    setSelectedFiles((prev) =>
+      prev.map((file) =>
+        file.id === fileId ? { ...file, targetExtension: extension } : file
+      )
     );
   };
 
@@ -191,6 +259,8 @@ const Converter = () => {
             files={selectedFiles}
             onRemove={removeFile}
             onDownload={downloadSingle}
+            onSettings={handleOpenSettings}
+            onExtensionChange={handleExtensionChange}
           />
           {/* 변환 버튼 */}
           <div className="mt-3 md:mt-4">
@@ -276,6 +346,18 @@ const Converter = () => {
           <Toast key={toast.id} toast={toast} onRemove={removeToast} />
         ))}
       </div>
+
+      {/* 이미지 설정 모달 */}
+      {editingFile && editingFileImageDimensions && (
+        <ImageSettingsModal
+          isOpen={isSettingsModalOpen}
+          onClose={handleCloseModal}
+          onSave={handleSaveSettings}
+          currentSettings={editingFile.settings}
+          originalWidth={editingFileImageDimensions.width}
+          originalHeight={editingFileImageDimensions.height}
+        />
+      )}
       </div>
     </div>
   );
