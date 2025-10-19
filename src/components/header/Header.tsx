@@ -7,7 +7,7 @@ export default function Header() {
   return (
     <header className="bg-gradient-to-r from-cyan-500 to-blue-600 shadow-lg">
       <div className="container mx-auto px-4 py-3 md:px-6 md:py-4">
-        <div className="grid grid-col-2 md:grid-cols-3 items-center gap-2 md:gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-[1fr_auto_1fr] items-center gap-2 md:gap-6">
           <Link
             to="/"
             aria-label="홈으로 이동"
@@ -57,7 +57,7 @@ export default function Header() {
             </ul>
           </nav>
           <HamburgerMenu
-            className="col-start-2 justify-self-end md:hidden"
+            className="col-start-2 justify-self-end"
             links={[
               { to: "/", label: "이미지 변환" },
               { to: "/remove-background", label: "배경 제거" },
