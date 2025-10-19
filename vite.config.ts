@@ -10,6 +10,18 @@ export default defineConfig({
     format: 'es'
   },
   optimizeDeps: {
-    exclude: ['onnxruntime-web']
+    exclude: [
+      'onnxruntime-web',
+      '@jsquash/jpeg',
+      '@jsquash/webp',
+      '@jsquash/png',
+      '@jsquash/oxipng'
+    ]
+  },
+  server: {
+    headers: {
+      'Cross-Origin-Opener-Policy': 'same-origin',
+      'Cross-Origin-Embedder-Policy': 'require-corp'
+    }
   }
 })

@@ -1,5 +1,9 @@
 import { useState } from "react";
 import type { ImageSettings } from "../types/types";
+import { encode as encodeJpeg } from "@jsquash/jpeg";
+import { encode as encodeWebp } from "@jsquash/webp";
+import { encode as encodePng } from "@jsquash/png";
+import { optimise as optimisePng } from "@jsquash/oxipng";
 
 export type FileStatus = "pending" | "converting" | "success" | "error";
 
@@ -46,50 +50,62 @@ const useImageConverter = () => {
 
       onProgress(PROGRESS.START);
 
-      img.onload = () => {
-        onProgress(PROGRESS.IMAGE_LOADED);
+      img.onload = async () => {
+        try {
+          onProgress(PROGRESS.IMAGE_LOADED);
 
-        // 설정에서 크기와 품질 가져오기
-        const quality = options.settings?.quality
-          ? options.settings.quality / 100
-          : DEFAULT_QUALITY;
+          // 설정에서 크기와 품질 가져오기
+          const quality = options.settings?.quality ?? DEFAULT_QUALITY; // 1-100 범위
+          const targetWidth = options.settings?.width ?? img.width;
+          const targetHeight = options.settings?.height ?? img.height;
 
-        const targetWidth = options.settings?.width ?? img.width;
-        const targetHeight = options.settings?.height ?? img.height;
+          // canvas 만들기
+          const canvas = document.createElement("canvas");
+          canvas.width = targetWidth;
+          canvas.height = targetHeight;
 
-        // canvas 만들기
-        const canvas = document.createElement("canvas");
-        canvas.width = targetWidth;
-        canvas.height = targetHeight;
+          // 이미지 그리기
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            URL.revokeObjectURL(url);
+            reject(new Error("Canvas context를 가져올 수 없습니다."));
+            return;
+          }
 
-        // 이미지 그리기
-        const ctx = canvas.getContext("2d");
-        if (!ctx) {
+          ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
           URL.revokeObjectURL(url);
-          reject(new Error("Canvas context를 가져올 수 없습니다."));
-          return;
+          onProgress(PROGRESS.CANVAS_DRAWN);
+
+          // Canvas에서 ImageData 추출
+          const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+          onProgress(PROGRESS.BLOB_CREATING);
+
+          // 확장자별로 적절한 인코더 사용
+          let resultBlob: Blob;
+
+          if (options.targetExtension === 'jpg') {
+            // JPEG 인코딩 (MozJPEG)
+            const encoded = await encodeJpeg(imageData, { quality });
+            resultBlob = new Blob([encoded], { type: 'image/jpeg' });
+          } else if (options.targetExtension === 'webp') {
+            // WebP 인코딩
+            const encoded = await encodeWebp(imageData, { quality });
+            resultBlob = new Blob([encoded], { type: 'image/webp' });
+          } else if (options.targetExtension === 'png') {
+            // PNG 인코딩 후 OxiPNG로 최적화
+            const encoded = await encodePng(imageData);
+            const optimised = await optimisePng(encoded, { level: 2 }); // level 0-6, 2는 균형잡힌 옵션
+            resultBlob = new Blob([optimised], { type: 'image/png' });
+          } else {
+            reject(new Error(`지원하지 않는 확장자입니다: ${options.targetExtension}`));
+            return;
+          }
+
+          resolve(resultBlob);
+        } catch (error) {
+          URL.revokeObjectURL(url);
+          reject(error instanceof Error ? error : new Error("이미지 변환에 실패했습니다."));
         }
-
-        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-        URL.revokeObjectURL(url);
-        onProgress(PROGRESS.CANVAS_DRAWN);
-
-        // 확장자에 맞는 MIME 타입 결정
-        const mimeType = `image/${options.targetExtension === 'jpg' ? 'jpeg' : options.targetExtension}`;
-
-        // 이미지 변환
-        canvas.toBlob(
-          (blob) => {
-            onProgress(PROGRESS.BLOB_CREATING);
-            if (blob) {
-              resolve(blob);
-            } else {
-              reject(new Error("이미지 변환에 실패했습니다."));
-            }
-          },
-          mimeType,
-          quality
-        );
       };
 
       img.onerror = () => {
