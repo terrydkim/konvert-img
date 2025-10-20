@@ -1,16 +1,16 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import ImageUploadIcon from "../../components/icons/ImageUploadIcon";
 import useFileDrop from "../../hooks/useFileDrop";
 
 import { Download, ImageIcon, Sliders } from "lucide-react";
 import Toast from "../../components/Toast";
+import useConversionHandler from "../../hooks/useConversionHandler";
 import useDownload from "../../hooks/useDownload";
-import useImageConverter, {
-  type ConversionProgress,
-} from "../../hooks/useImageConverter";
+import useFileManager from "../../hooks/useFileManager";
+import useImageConverter from "../../hooks/useImageConverter";
 import useToast from "../../hooks/useToast";
 import validateFiles from "../../hooks/validateFiles";
-import type { FileItem, ImageSettings } from "../../types/types";
+import type { ImageSettings } from "../../types/types";
 import { isMobile } from "../../utils";
 import {
   MAX_SIZE_TOOLTIP_DESKTOP,
@@ -25,12 +25,24 @@ const maxSizeToolTip = isMobile()
   : MAX_SIZE_TOOLTIP_DESKTOP;
 
 const Converter = () => {
-  const [selectedFiles, setSelectedFiles] = useState<FileItem[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toasts, showToast, removeToast } = useToast();
 
-  const { isConverting, startConversion } = useImageConverter();
+  // 파일 관리 훅
+  const {
+    files: selectedFiles,
+    addFiles,
+    removeFile,
+    updateFile,
+    updateFileSettings,
+    updateFileExtension,
+    resetAll: resetAllFiles,
+    findFile,
+    successCount,
+    convertibleCount,
+  } = useFileManager();
 
+  const { isConverting, startConversion } = useImageConverter();
   const { downloadSingle, downloadZip } = useDownload();
 
   // 모달 상태 관리
@@ -41,63 +53,37 @@ const Converter = () => {
     height: number;
   } | null>(null);
 
-  const successCount = selectedFiles.filter(
-    (f) => f.status === "success"
-  ).length;
-
-  const convertibleCount = selectedFiles.filter(
-    (f) => f.status === "pending" || f.status === "error"
-  ).length;
-
-  const handleFilesAdded = (files: File[]) => {
-    const { valid, invalid } = validateFiles(
-      files,
-      selectedFiles.map((f) => f.file)
-    );
-
-    if (valid.length > 0) {
-      const newFileItems: FileItem[] = valid.map((file) => ({
-        id: crypto.randomUUID(),
-        file,
-        preview: URL.createObjectURL(file),
-        targetExtension: "webp",
-        status: "pending",
-      }));
-      setSelectedFiles((prev) => [...prev, ...newFileItems]);
-    }
-
-    if (invalid.length > 0) {
-      const details = invalid.map((item) => `${item.file.name} - ${item.reason}`);
-      showToast(
-        `${invalid.length}개 파일 업로드 실패`,
-        "error",
-        details
+  const handleFilesAdded = useCallback(
+    (files: File[]) => {
+      const { valid, invalid } = validateFiles(
+        files,
+        selectedFiles.map((f) => f.file)
       );
-    }
-  };
 
-  const removeFile = (id: string) => {
-    setSelectedFiles((prev) => {
-      const file = prev.find((file) => file.id === id);
-      if (file) URL.revokeObjectURL(file.preview);
-      return prev.filter((file) => file.id !== id);
-    });
-  };
+      if (valid.length > 0) {
+        addFiles(valid);
+      }
 
-  const resetAll = () => {
+      if (invalid.length > 0) {
+        const details = invalid.map(
+          (item) => `${item.file.name} - ${item.reason}`
+        );
+        showToast(`${invalid.length}개 파일 업로드 실패`, "error", details);
+      }
+    },
+    [selectedFiles, addFiles, showToast]
+  );
+
+  const resetAll = useCallback(() => {
     const confirmed = window.confirm(
       `정말로 ${selectedFiles.length}개의 파일을 모두 삭제하시겠습니까?`
     );
 
     if (!confirmed) return;
 
-    selectedFiles.forEach((file) => {
-      URL.revokeObjectURL(file.preview);
-      if (file.convertedUrl) URL.revokeObjectURL(file.convertedUrl);
-    });
-    setSelectedFiles([]);
+    resetAllFiles();
     if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+  }, [selectedFiles.length, resetAllFiles]);
 
   const { isDragging, fileCount } = useFileDrop(handleFilesAdded);
 
@@ -113,7 +99,25 @@ const Converter = () => {
     fileInputRef.current?.click();
   };
 
-  const handleConvert = () => {
+  // 에러 핸들러
+  const handleConversionError = useCallback(
+    (fileName: string | undefined, errorMessage: string) => {
+      showToast(
+        `${fileName ? `"${fileName}" ` : ""}변환 실패: ${errorMessage}`,
+        "error"
+      );
+    },
+    [showToast]
+  );
+
+  // 변환 진행 상황 처리
+  const { handleProgress } = useConversionHandler({
+    onUpdateFile: updateFile,
+    onError: handleConversionError,
+    findFile,
+  });
+
+  const handleConvert = useCallback(() => {
     const filesToConvert = selectedFiles
       .filter((f) => f.status === "pending" || f.status === "error")
       .map((f) => ({
@@ -125,34 +129,8 @@ const Converter = () => {
         },
       }));
 
-    startConversion(filesToConvert, (progressData: ConversionProgress) => {
-      setSelectedFiles((prev) =>
-        prev.map((file) =>
-          file.id === progressData.id
-            ? {
-                ...file,
-                status: progressData.status,
-                progress: progressData.progress,
-                convertedBlob: progressData.result?.blob,
-                convertedUrl: progressData.result?.url,
-                convertedSize: progressData.result?.size,
-                error: progressData.error,
-              }
-            : file
-        )
-      );
-
-      // 에러 발생 시 Toast 표시
-      if (progressData.status === "error") {
-        const fileName = selectedFiles.find((f) => f.id === progressData.id)
-          ?.file.name;
-        showToast(
-          `${fileName ? `"${fileName}" ` : ""}변환 실패: ${progressData.error || "알 수 없는 오류"}`,
-          "error"
-        );
-      }
-    });
-  };
+    startConversion(filesToConvert, handleProgress);
+  }, [selectedFiles, startConversion, handleProgress]);
 
   const handleDownloadZip = async () => {
     const result = await downloadZip(selectedFiles);
@@ -186,20 +164,16 @@ const Converter = () => {
   };
 
   // 설정 저장 핸들러
-  const handleSaveSettings = (settings: ImageSettings) => {
-    if (!editingFileId) return;
+  const handleSaveSettings = useCallback(
+    (settings: ImageSettings) => {
+      if (!editingFileId) return;
 
-    setSelectedFiles((prev) =>
-      prev.map((file) =>
-        file.id === editingFileId
-          ? { ...file, settings }
-          : file
-      )
-    );
-
-    setEditingFileId(null);
-    setEditingFileImageDimensions(null);
-  };
+      updateFileSettings(editingFileId, settings);
+      setEditingFileId(null);
+      setEditingFileImageDimensions(null);
+    },
+    [editingFileId, updateFileSettings]
+  );
 
   // 모달 닫기 핸들러
   const handleCloseModal = () => {
@@ -214,13 +188,12 @@ const Converter = () => {
     : null;
 
   // 확장자 변경 핸들러
-  const handleExtensionChange = (fileId: string, extension: string) => {
-    setSelectedFiles((prev) =>
-      prev.map((file) =>
-        file.id === fileId ? { ...file, targetExtension: extension } : file
-      )
-    );
-  };
+  const handleExtensionChange = useCallback(
+    (fileId: string, extension: string) => {
+      updateFileExtension(fileId, extension);
+    },
+    [updateFileExtension]
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 xl:p-10">

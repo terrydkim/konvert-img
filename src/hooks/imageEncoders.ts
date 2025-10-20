@@ -18,6 +18,8 @@ let wasmOxipngOptimizer: typeof import("@jsquash/oxipng").optimise | null =
 // WebP 지원 여부 캐싱
 let webpSupported: boolean | null = null;
 
+const DEFAULT_QUALITY = 80;
+
 /**
  * 브라우저의 네이티브 WebP 인코딩 지원 여부 감지
  */
@@ -248,7 +250,7 @@ export async function encodeImage(
   targetExtension: string,
   settings?: ImageSettings
 ): Promise<Blob> {
-  const quality = settings?.quality ?? 90;
+  const quality = settings?.quality ?? DEFAULT_QUALITY;
 
   switch (targetExtension) {
     case "webp":

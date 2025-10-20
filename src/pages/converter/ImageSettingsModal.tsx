@@ -28,11 +28,11 @@ const ImageSettingsModal = ({
 
   // 비율 계산
   const aspectRatio = originalWidth / originalHeight;
-
+  const DEFAULT_QUALITY = 80;
   // 초기값 설정
   useEffect(() => {
     if (isOpen) {
-      setQuality(currentSettings?.quality ?? 90);
+      setQuality(currentSettings?.quality ?? DEFAULT_QUALITY);
       setWidth(currentSettings?.width ?? originalWidth);
       setHeight(currentSettings?.height ?? originalHeight);
       setMaintainAspectRatio(currentSettings?.maintainAspectRatio ?? true);
