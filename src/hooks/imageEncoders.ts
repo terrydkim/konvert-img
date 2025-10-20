@@ -2,10 +2,11 @@
  * 이미지 인코더 유틸리티
  * - 크로스 브라우저 WebP 지원 (Safari 폴백)
  * - 네이티브 API 우선, WASM 폴백
- * - JPG vs WebP 용량 비교 및 최적 선택
+ * - 에러 처리 및 폴백 체인
  */
 
 import type { ImageSettings } from "../types/types";
+import { ImageEncodingError } from "../types/errors";
 
 // WASM 인코더 (lazy load)
 let wasmWebpEncoder: typeof import("@jsquash/webp").encode | null = null;
@@ -61,30 +62,36 @@ async function encodeWithCanvas(
   quality: number
 ): Promise<Blob | null> {
   return new Promise((resolve) => {
-    const canvas = document.createElement("canvas");
-    canvas.width = imageData.width;
-    canvas.height = imageData.height;
-    const ctx = canvas.getContext("2d");
+    try {
+      const canvas = document.createElement("canvas");
+      canvas.width = imageData.width;
+      canvas.height = imageData.height;
+      const ctx = canvas.getContext("2d");
 
-    if (!ctx) {
+      if (!ctx) {
+        resolve(null);
+        return;
+      }
+
+      ctx.putImageData(imageData, 0, 0);
+
+      canvas.toBlob(
+        (blob) => {
+          // MIME 타입 검증 (Safari 폴백 감지)
+          if (blob && blob.type === mimeType) {
+            resolve(blob);
+          } else {
+            resolve(null);
+          }
+        },
+        mimeType,
+        quality / 100 // Canvas는 0-1 범위
+      );
+    } catch (error) {
+      // Canvas API 에러는 조용히 폴백
+      console.warn("Canvas 인코딩 실패:", error);
       resolve(null);
-      return;
     }
-
-    ctx.putImageData(imageData, 0, 0);
-
-    canvas.toBlob(
-      (blob) => {
-        // MIME 타입 검증 (Safari 폴백 감지)
-        if (blob && blob.type === mimeType) {
-          resolve(blob);
-        } else {
-          resolve(null);
-        }
-      },
-      mimeType,
-      quality / 100 // Canvas는 0-1 범위
-    );
   });
 }
 
@@ -95,19 +102,34 @@ async function encodeWebPWithWasm(
   imageData: ImageData,
   quality: number
 ): Promise<Blob> {
-  if (!wasmWebpEncoder) {
-    const module = await import("@jsquash/webp");
-    wasmWebpEncoder = module.encode;
+  try {
+    if (!wasmWebpEncoder) {
+      const module = await import("@jsquash/webp");
+      wasmWebpEncoder = module.encode;
+    }
+
+    const encoded = await wasmWebpEncoder(imageData, {
+      quality: Math.max(1, Math.min(100, quality)),
+      method: 6,
+      lossless: 0,
+      near_lossless: 0,
+    });
+
+    return new Blob([encoded], { type: "image/webp" });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("Failed to fetch")) {
+      throw new ImageEncodingError(
+        "WASM 모듈 로딩 실패 (네트워크 문제)",
+        "WASM_LOAD_FAILED",
+        error
+      );
+    }
+    throw new ImageEncodingError(
+      "WebP WASM 인코딩 중 오류 발생",
+      "ENCODING_FAILED",
+      error
+    );
   }
-
-  const encoded = await wasmWebpEncoder(imageData, {
-    quality: Math.max(1, Math.min(100, quality)),
-    method: 6,
-    lossless: 0,
-    near_lossless: 0,
-  });
-
-  return new Blob([encoded], { type: "image/webp" });
 }
 
 /**
@@ -117,36 +139,66 @@ async function encodeJPEGWithWasm(
   imageData: ImageData,
   quality: number
 ): Promise<Blob> {
-  if (!wasmJpegEncoder) {
-    const module = await import("@jsquash/jpeg");
-    wasmJpegEncoder = module.encode;
-  }
+  try {
+    if (!wasmJpegEncoder) {
+      const module = await import("@jsquash/jpeg");
+      wasmJpegEncoder = module.encode;
+    }
 
-  const encoded = await wasmJpegEncoder(imageData, { quality });
-  return new Blob([encoded], { type: "image/jpeg" });
+    const encoded = await wasmJpegEncoder(imageData, { quality });
+    return new Blob([encoded], { type: "image/jpeg" });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("Failed to fetch")) {
+      throw new ImageEncodingError(
+        "WASM 모듈 로딩 실패 (네트워크 문제)",
+        "WASM_LOAD_FAILED",
+        error
+      );
+    }
+    throw new ImageEncodingError(
+      "JPEG WASM 인코딩 중 오류 발생",
+      "ENCODING_FAILED",
+      error
+    );
+  }
 }
 
 /**
  * WASM을 사용한 PNG 인코딩 + OxiPNG 최적화
  */
 async function encodePNGWithWasm(imageData: ImageData): Promise<Blob> {
-  if (!wasmPngEncoder) {
-    const module = await import("@jsquash/png");
-    wasmPngEncoder = module.encode;
-  }
+  try {
+    if (!wasmPngEncoder) {
+      const module = await import("@jsquash/png");
+      wasmPngEncoder = module.encode;
+    }
 
-  if (!wasmOxipngOptimizer) {
-    const module = await import("@jsquash/oxipng");
-    wasmOxipngOptimizer = module.optimise;
-  }
+    if (!wasmOxipngOptimizer) {
+      const module = await import("@jsquash/oxipng");
+      wasmOxipngOptimizer = module.optimise;
+    }
 
-  const encoded = await wasmPngEncoder(imageData);
-  const optimised = await wasmOxipngOptimizer(encoded, { level: 2 });
-  return new Blob([optimised], { type: "image/png" });
+    const encoded = await wasmPngEncoder(imageData);
+    const optimised = await wasmOxipngOptimizer(encoded, { level: 2 });
+    return new Blob([optimised], { type: "image/png" });
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("Failed to fetch")) {
+      throw new ImageEncodingError(
+        "WASM 모듈 로딩 실패 (네트워크 문제)",
+        "WASM_LOAD_FAILED",
+        error
+      );
+    }
+    throw new ImageEncodingError(
+      "PNG WASM 인코딩 중 오류 발생",
+      "ENCODING_FAILED",
+      error
+    );
+  }
 }
 
 /**
- * WebP 인코딩 (네이티브 vs WASM 비교 후 더 작은 것 선택)
+ * WebP 인코딩 (네이티브 우선, WASM 폴백)
  */
 export async function encodeWebP(
   imageData: ImageData,
@@ -154,22 +206,21 @@ export async function encodeWebP(
 ): Promise<Blob> {
   const isSupported = await checkWebPSupport();
 
-  let nativeBlob: Blob | null = null;
-
-  // 1. 네이티브 WebP 시도 (지원되면)
+  // 1. Chrome/Edge: 네이티브 WebP 우선 시도
   if (isSupported) {
-    nativeBlob = await encodeWithCanvas(imageData, "image/webp", quality);
+    try {
+      const nativeBlob = await encodeWithCanvas(imageData, "image/webp", quality);
+      if (nativeBlob) {
+        return nativeBlob;
+      }
+    } catch (error) {
+      console.warn("네이티브 WebP 인코딩 실패, WASM으로 폴백:", error);
+      // WASM으로 폴백 계속 진행
+    }
   }
 
-  // 2. WASM WebP 시도 (항상)
-  const wasmBlob = await encodeWebPWithWasm(imageData, quality);
-
-  // 3. 네이티브와 WASM 중 작은 것 선택
-  if (nativeBlob && nativeBlob.size < wasmBlob.size) {
-    return nativeBlob;
-  }
-
-  return wasmBlob;
+  // 2. Safari 또는 네이티브 실패 시: WASM 사용
+  return encodeWebPWithWasm(imageData, quality);
 }
 
 /**
@@ -210,6 +261,9 @@ export async function encodeImage(
       return encodePNG(imageData);
 
     default:
-      throw new Error(`지원하지 않는 확장자입니다: ${targetExtension}`);
+      throw new ImageEncodingError(
+        `지원하지 않는 확장자입니다: ${targetExtension}`,
+        "UNSUPPORTED_FORMAT"
+      );
   }
 }
