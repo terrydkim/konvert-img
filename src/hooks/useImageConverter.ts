@@ -123,6 +123,7 @@ const useImageConverter = () => {
           },
         });
       } catch (error) {
+        console.error("[이미지 변환 실패]", { id, file: file.name, error });
         onProgress({
           id,
           status: "error",

@@ -141,6 +141,16 @@ const Converter = () => {
             : file
         )
       );
+
+      // 에러 발생 시 Toast 표시
+      if (progressData.status === "error") {
+        const fileName = selectedFiles.find((f) => f.id === progressData.id)
+          ?.file.name;
+        showToast(
+          `${fileName ? `"${fileName}" ` : ""}변환 실패: ${progressData.error || "알 수 없는 오류"}`,
+          "error"
+        );
+      }
     });
   };
 
