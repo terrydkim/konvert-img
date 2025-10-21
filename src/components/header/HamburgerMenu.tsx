@@ -11,7 +11,20 @@ type HamburgerMenuProps = {
   panelClassName?: string;
 };
 
-const bpToClass = (bp: HamburgerMenuProps["breakpoint"]) => bp ?? "md";
+const bpToHiddenClass = (bp: HamburgerMenuProps["breakpoint"]) => {
+  switch (bp) {
+    case "sm":
+      return "sm:hidden";
+    case "md":
+      return "md:hidden";
+    case "lg":
+      return "lg:hidden";
+    case "xl":
+      return "xl:hidden";
+    default:
+      return "md:hidden";
+  }
+};
 
 const HamburgerMenu = ({
   links,
@@ -51,14 +64,14 @@ const HamburgerMenu = ({
     return () => document.removeEventListener("mousedown", onDown);
   }, [open]);
 
-  const bp = bpToClass(breakpoint);
+  const hiddenClass = bpToHiddenClass(breakpoint);
 
   return (
-    <div className={`${bp}:hidden ${className}`}>
+    <div className={`${hiddenClass} ${className}`}>
       <button
         ref={btnRef}
         type="button"
-        className={`flex ${bp}:hidden items-center justify-self-end rounded-md p-2 text-white/90 hover:text-white hover:bg-white/10
+        className={`flex ${hiddenClass} items-center justify-self-end rounded-md p-2 text-white/90 hover:text-white hover:bg-white/10
       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60`}
         aria-label={open ? "메뉴 닫기" : "메뉴 열기"}
         aria-expanded={open ? true : false}
@@ -91,7 +104,7 @@ const HamburgerMenu = ({
         ref={panelRef}
         id={panelId}
         className={[
-          `${bp}:hidden overflow-hidden transition-[max-height,opacity] duration-300`,
+          `${hiddenClass} overflow-hidden transition-[max-height,opacity] duration-300`,
           open ? "max-h-96 opacity-100" : "max-h-0 opacity-0",
           panelClassName,
         ].join(" ")}
