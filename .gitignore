@@ -16,6 +16,9 @@ CLAUDE.md
 .claude
 .env
 
+# Bundle analyzer
+stats.html
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
