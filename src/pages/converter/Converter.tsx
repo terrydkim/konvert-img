@@ -200,7 +200,7 @@ const Converter = () => {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "konvert-img 이미지 변환기",
-    "url": "https://konvert-img.com/",
+    "url": "https://konvert-img.vercel.app/",
     "description": "무료 온라인 이미지 변환 도구. PNG, WEBP, JPG 형식으로 이미지를 빠르고 안전하게 변환하세요.",
     "applicationCategory": "MultimediaApplication",
     "operatingSystem": "Any",
@@ -225,7 +225,7 @@ const Converter = () => {
         title="무료 이미지 변환기 | PNG, WEBP, JPG 변환 - konvert-img"
         description="이미지를 PNG, WEBP, JPG 형식으로 무료 변환하세요. 브라우저에서 빠르고 안전하게 일괄 변환 가능. 업로드 불필요, 100% 개인정보 보호."
         keywords="이미지 변환, PNG 변환, WEBP 변환, JPG 변환, 무료 이미지 컨버터, 온라인 이미지 변환, 일괄 이미지 변환"
-        canonical="https://konvert-img.com/"
+        canonical="https://konvert-img.vercel.app/"
         jsonLd={converterJsonLd}
       />
       <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 xl:p-10">

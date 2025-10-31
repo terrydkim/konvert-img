@@ -14,8 +14,8 @@ const SEO = ({
   title,
   description,
   keywords = "이미지 변환, PNG 변환, WEBP 변환, JPG 변환, 무료 이미지 컨버터, 온라인 이미지 변환",
-  canonical = "https://konvert-img.com/",
-  ogImage = "https://konvert-img.com/og-image.png",
+  canonical = "https://konvert-img.vercel.app/",
+  ogImage = "https://konvert-img.vercel.app/og-image.png",
   ogType = "website",
   jsonLd,
 }: SEOProps) => {

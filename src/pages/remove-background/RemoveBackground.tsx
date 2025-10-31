@@ -157,7 +157,7 @@ const RemoveBackground = () => {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "konvert-img 배경 제거",
-    "url": "https://konvert-img.com/remove-background",
+    "url": "https://konvert-img.vercel.app/remove-background",
     "description": "AI 기반 자동 이미지 배경 제거 도구. 클릭 한 번으로 배경을 투명하게 제거하세요.",
     "applicationCategory": "MultimediaApplication",
     "operatingSystem": "Any",
@@ -180,7 +180,7 @@ const RemoveBackground = () => {
         title="무료 이미지 배경 제거 | AI 자동 배경 투명화 - konvert-img"
         description="AI 기반 자동 이미지 배경 제거 도구. 클릭 한 번으로 배경을 투명하게 제거하고 PNG로 저장하세요. 무료, 빠르고 안전한 배경 제거 서비스."
         keywords="배경 제거, 이미지 배경 제거, 배경 투명화, AI 배경 제거, 온라인 배경 제거, 무료 배경 제거"
-        canonical="https://konvert-img.com/remove-background"
+        canonical="https://konvert-img.vercel.app/remove-background"
         jsonLd={removeBackgroundJsonLd}
       />
       <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 xl:p-10">

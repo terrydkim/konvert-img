@@ -44,7 +44,7 @@ const Signature = () => {
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "konvert-img 온라인 서명",
-    "url": "https://konvert-img.com/signature",
+    "url": "https://konvert-img.vercel.app/signature",
     "description": "무료 온라인 전자 서명 도구. 마우스나 터치로 서명하고 PNG로 다운로드하세요.",
     "applicationCategory": "MultimediaApplication",
     "operatingSystem": "Any",
@@ -67,7 +67,7 @@ const Signature = () => {
         title="무료 온라인 서명 | 전자서명 PNG 다운로드 - konvert-img"
         description="무료 온라인 전자 서명 도구. 마우스나 터치로 간편하게 서명하고 PNG 이미지로 저장하세요. 계약서, 문서 서명에 활용 가능."
         keywords="온라인 서명, 전자서명, 서명 이미지, 서명 PNG, 무료 서명, 디지털 서명"
-        canonical="https://konvert-img.com/signature"
+        canonical="https://konvert-img.vercel.app/signature"
         jsonLd={signatureJsonLd}
       />
       <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 ">
