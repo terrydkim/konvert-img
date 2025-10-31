@@ -209,9 +209,9 @@ const Converter = () => {
           </div>
           <div className="gap-2 flex flex-col items-center">
             <div>이미지를 드래그하세요.</div>
-            <p className="text-gray-400 text-sm">또는</p>
+            <p className="text-gray-600 text-sm">또는</p>
             <div>파일을 업로드하세요.</div>
-            <p className="mt-1 text-xs text-gray-400">
+            <p className="mt-1 text-xs text-gray-600">
               최대 {maxSizeToolTip} (개당 100MB)
             </p>
           </div>
