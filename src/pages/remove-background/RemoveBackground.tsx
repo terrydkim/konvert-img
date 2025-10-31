@@ -3,6 +3,7 @@ import ImageUploadIcon from "../../components/icons/ImageUploadIcon";
 import useFileDrop from "../../hooks/useFileDrop";
 
 import { Download, ImageOff, Sparkles } from "lucide-react";
+import SEO from "../../components/SEO";
 import Toast from "../../components/Toast";
 import useBackgroundRemoval, {
   type RemovalProgress,
@@ -132,12 +133,41 @@ const RemoveBackground = () => {
     );
   };
 
+  const removeBackgroundJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "konvert-img 배경 제거",
+    "url": "https://konvert-img.com/remove-background",
+    "description": "AI 기반 자동 이미지 배경 제거 도구. 클릭 한 번으로 배경을 투명하게 제거하세요.",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "KRW"
+    },
+    "featureList": [
+      "AI 자동 배경 제거",
+      "투명 배경 PNG 생성",
+      "일괄 처리 지원",
+      "브라우저 내 처리"
+    ]
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 xl:p-10">
-      <div className="max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto">
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-center">
-          이미지 배경 제거
-        </h1>
+    <>
+      <SEO
+        title="무료 이미지 배경 제거 | AI 자동 배경 투명화 - konvert-img"
+        description="AI 기반 자동 이미지 배경 제거 도구. 클릭 한 번으로 배경을 투명하게 제거하고 PNG로 저장하세요. 무료, 빠르고 안전한 배경 제거 서비스."
+        keywords="배경 제거, 이미지 배경 제거, 배경 투명화, AI 배경 제거, 온라인 배경 제거, 무료 배경 제거"
+        canonical="https://konvert-img.com/remove-background"
+        jsonLd={removeBackgroundJsonLd}
+      />
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8 xl:p-10">
+        <div className="max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-center">
+            이미지 배경 제거
+          </h1>
         <section className="mb-4 md:mb-6 text-center bg-white p-4 sm:p-6 rounded-lg shadow-md">
           <div
             className="rounded-lg border-2 border-dashed border-gray-300 p-4 sm:p-6 cursor-pointer hover:bg-purple-50 hover:border-purple-500 transition-colors group"
@@ -268,6 +298,7 @@ const RemoveBackground = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 

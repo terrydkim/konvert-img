@@ -1,3 +1,4 @@
+import SEO from "../../components/SEO";
 import Toast from "../../components/Toast";
 import useSignature from "../../hooks/useSignature";
 import useToast from "../../hooks/useToast";
@@ -39,12 +40,41 @@ const Signature = () => {
     showToast("서명이 다운로드되었습니다!", "success");
   };
 
+  const signatureJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "konvert-img 온라인 서명",
+    "url": "https://konvert-img.com/signature",
+    "description": "무료 온라인 전자 서명 도구. 마우스나 터치로 서명하고 PNG로 다운로드하세요.",
+    "applicationCategory": "MultimediaApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "KRW"
+    },
+    "featureList": [
+      "마우스/터치 서명",
+      "PNG 다운로드",
+      "실행 취소 기능",
+      "브라우저 내 처리"
+    ]
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 ">
-        <div className="max-w-2xl md:max-w-xl lg:max-w-2xl mx-auto">
-        <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-center text-gray-800">
-          온라인 서명
-        </h1>
+    <>
+      <SEO
+        title="무료 온라인 서명 | 전자서명 PNG 다운로드 - konvert-img"
+        description="무료 온라인 전자 서명 도구. 마우스나 터치로 간편하게 서명하고 PNG 이미지로 저장하세요. 계약서, 문서 서명에 활용 가능."
+        keywords="온라인 서명, 전자서명, 서명 이미지, 서명 PNG, 무료 서명, 디지털 서명"
+        canonical="https://konvert-img.com/signature"
+        jsonLd={signatureJsonLd}
+      />
+      <div className="min-h-screen bg-gray-50 p-4 sm:p-6 md:p-8 lg:p-10 ">
+          <div className="max-w-2xl md:max-w-xl lg:max-w-2xl mx-auto">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 md:mb-6 text-center text-gray-800">
+            온라인 서명
+          </h1>
 
         <section className="mb-4 md:mb-6 text-center bg-white p-4 sm:p-6 rounded-lg shadow-md">
           <p className="text-gray-600 text-sm md:text-base mb-4 md:mb-6">
@@ -92,6 +122,7 @@ const Signature = () => {
         ))}
       </div>
     </div>
+    </>
   );
 };
 
