@@ -5,6 +5,8 @@ import type {
   WorkerMessage,
   WorkerResponse,
 } from "../workers/imageConversion.worker";
+// Vite가 빌드 시점에 워커를 감지할 수 있도록 명시적으로 import
+import ImageConversionWorker from "../workers/imageConversion.worker.ts?worker";
 
 export type FileStatus = "pending" | "converting" | "success" | "error";
 
@@ -30,9 +32,9 @@ export interface ConversionOptions {
 const useImageConverter = () => {
   const [isConverting, setIsConverting] = useState(false);
 
-  // 워커 풀 초기화 (CPU 코어 수만큼 워커 생성)
+  // 워커 풀 초기화 - Worker 생성자를 직접 전달
   const { runTask } = useWorkerPool<WorkerMessage, WorkerResponse>(
-    "../workers/imageConversion.worker.ts"
+    ImageConversionWorker
   );
 
   const convertImages = async (

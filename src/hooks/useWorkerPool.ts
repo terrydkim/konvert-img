@@ -24,11 +24,11 @@ interface WorkerResponseBase {
 
 /**
  * 웹워커 풀을 관리하는 훅
- * @param workerUrl - 워커 파일 경로
+ * @param workerSource - 워커 파일 경로(string) 또는 Worker 생성자
  * @param poolSize - 워커 풀 크기 (기본값: navigator.hardwareConcurrency 또는 4)
  */
 export const useWorkerPool = <TMessage, TResponse>(
-  workerUrl: string,
+  workerSource: string | (new () => Worker),
   poolSize?: number
 ) => {
   const workersRef = useRef<WorkerWithState[]>([]);
@@ -119,11 +119,13 @@ export const useWorkerPool = <TMessage, TResponse>(
 
   // 워커 풀 초기화
   useEffect(() => {
-    // 워커 생성
+    // 워커 생성 - Worker 생성자 또는 URL 문자열 지원
     workersRef.current = Array.from({ length: size }, () => ({
-      worker: new Worker(new URL(workerUrl, import.meta.url), {
-        type: "module",
-      }),
+      worker: typeof workerSource === "string"
+        ? new Worker(new URL(workerSource, import.meta.url), {
+            type: "module",
+          })
+        : new workerSource(),
       busy: false,
     }));
 
@@ -146,7 +148,7 @@ export const useWorkerPool = <TMessage, TResponse>(
       workersRef.current = [];
       queueRef.current = [];
     };
-  }, [workerUrl, size, handleWorkerMessage]);
+  }, [workerSource, size, handleWorkerMessage]);
 
   // 태스크를 큐에 추가하고 처리
   const runTask = useCallback(
