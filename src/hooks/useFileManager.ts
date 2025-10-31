@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 import type { FileItem, ImageSettings } from "../types/types";
+import { createThumbnail } from "../utils/createThumbnail";
 
 /**
  * 파일 목록 관리 커스텀 훅
@@ -12,14 +13,33 @@ const useFileManager = () => {
   /**
    * 새 파일 추가
    */
-  const addFiles = useCallback((newFiles: File[]) => {
-    const fileItems: FileItem[] = newFiles.map((file) => ({
-      id: crypto.randomUUID(),
-      file,
-      preview: URL.createObjectURL(file),
-      targetExtension: "webp",
-      status: "pending",
-    }));
+  const addFiles = useCallback(async (newFiles: File[]) => {
+    // 각 파일에 대해 썸네일 생성
+    const fileItemsPromises = newFiles.map(async (file) => {
+      try {
+        // 썸네일 생성 (최대 200px, 품질 0.7)
+        const thumbnailUrl = await createThumbnail(file, 200, 0.7);
+        return {
+          id: crypto.randomUUID(),
+          file,
+          preview: thumbnailUrl,
+          targetExtension: "webp" as const,
+          status: "pending" as const,
+        };
+      } catch (error) {
+        // 썸네일 생성 실패 시 원본 사용 (폴백)
+        console.warn(`썸네일 생성 실패 (${file.name}):`, error);
+        return {
+          id: crypto.randomUUID(),
+          file,
+          preview: URL.createObjectURL(file),
+          targetExtension: "webp" as const,
+          status: "pending" as const,
+        };
+      }
+    });
+
+    const fileItems = await Promise.all(fileItemsPromises);
     setFiles((prev) => [...prev, ...fileItems]);
   }, []);
 

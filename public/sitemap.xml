@@ -4,7 +4,7 @@
 
   <!-- 메인 페이지 (이미지 변환) -->
   <url>
-    <loc>https://konvert-img.com/</loc>
+    <loc>https://konvert-img.vercel.app/</loc>
     <lastmod>2025-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -12,7 +12,7 @@
 
   <!-- 배경 제거 페이지 -->
   <url>
-    <loc>https://konvert-img.com/remove-background</loc>
+    <loc>https://konvert-img.vercel.app/remove-background</loc>
     <lastmod>2025-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
@@ -20,7 +20,7 @@
 
   <!-- 온라인 서명 페이지 -->
   <url>
-    <loc>https://konvert-img.com/signature</loc>
+    <loc>https://konvert-img.vercel.app/signature</loc>
     <lastmod>2025-10-31</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>

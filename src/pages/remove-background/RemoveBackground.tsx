@@ -12,6 +12,7 @@ import useDownload from "../../hooks/useDownload";
 import useToast from "../../hooks/useToast";
 import validateFiles from "../../hooks/validateFiles";
 import type { FileItem } from "../../types/types";
+import { createThumbnail } from "../../utils";
 import DropOverlay from "../converter/DropOverlay";
 import FileTable from "../converter/FileTable";
 
@@ -32,20 +33,39 @@ const RemoveBackground = () => {
     (f) => f.status === "pending" || f.status === "error"
   ).length;
 
-  const handleFilesAdded = (files: File[]) => {
+  const handleFilesAdded = async (files: File[]) => {
     const { valid, invalid } = validateFiles(
       files,
       selectedFiles.map((f) => f.file)
     );
 
     if (valid.length > 0) {
-      const newFileItems: FileItem[] = valid.map((file) => ({
-        id: crypto.randomUUID(),
-        file,
-        preview: URL.createObjectURL(file),
-        targetExtension: "png",
-        status: "pending",
-      }));
+      // 각 파일에 대해 썸네일 생성
+      const fileItemsPromises = valid.map(async (file) => {
+        try {
+          // 썸네일 생성 (최대 200px, 품질 0.7)
+          const thumbnailUrl = await createThumbnail(file, 200, 0.7);
+          return {
+            id: crypto.randomUUID(),
+            file,
+            preview: thumbnailUrl,
+            targetExtension: "png" as const,
+            status: "pending" as const,
+          };
+        } catch (error) {
+          // 썸네일 생성 실패 시 원본 사용 (폴백)
+          console.warn(`썸네일 생성 실패 (${file.name}):`, error);
+          return {
+            id: crypto.randomUUID(),
+            file,
+            preview: URL.createObjectURL(file),
+            targetExtension: "png" as const,
+            status: "pending" as const,
+          };
+        }
+      });
+
+      const newFileItems = await Promise.all(fileItemsPromises);
       setSelectedFiles((prev) => [...prev, ...newFileItems]);
     }
 
