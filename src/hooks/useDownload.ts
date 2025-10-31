@@ -1,4 +1,3 @@
-import JSZip from "jszip";
 import type { FileItem } from "../types/types";
 
 export interface DownloadResult {
@@ -35,6 +34,8 @@ const useDownload = () => {
     }
 
     try {
+      // JSZip을 동적으로 로드 (필요할 때만)
+      const JSZip = (await import("jszip")).default;
       const zip = new JSZip();
 
       successFiles.forEach((fileItem) => {
