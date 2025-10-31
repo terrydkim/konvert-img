@@ -1,0 +1,20 @@
+# robots.txt for konvert-img.com
+# 이미지 변환기 웹 애플리케이션
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://konvert-img.com/sitemap.xml
+
+# 크롤링 속도 제한 (선택사항)
+Crawl-delay: 1
+
+# 주요 페이지
+Allow: /
+Allow: /remove-background
+Allow: /signature
+
+# 제외할 경로 (필요시)
+Disallow: /api/
+Disallow: /*.json$
