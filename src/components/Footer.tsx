@@ -5,7 +5,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* About Section */}
           <div>
-            <h3 className="text-xl font-bold mb-4 text-cyan-400">Konvert-img</h3>
+            <h2 className="text-xl font-bold mb-4 text-cyan-400">Konvert-img</h2>
             <p className="text-slate-300 text-sm leading-relaxed">
               무료 온라인 이미지 변환 도구입니다.
               브라우저에서 안전하게 이미지를 변환하세요.
@@ -14,7 +14,7 @@ export default function Footer() {
 
           {/* Features Section */}
           <div>
-            <h3 className="text-xl font-bold mb-4 text-cyan-400">특징</h3>
+            <h2 className="text-xl font-bold mb-4 text-cyan-400">특징</h2>
             <ul className="text-slate-300 text-sm space-y-2">
               <li className="flex items-center gap-2">
                 <span className="text-cyan-400">✓</span> 100% 클라이언트 사이드 처리
@@ -30,7 +30,7 @@ export default function Footer() {
 
           {/* Contact Section */}
           <div>
-            <h3 className="text-xl font-bold mb-4 text-cyan-400">만든이</h3>
+            <h2 className="text-xl font-bold mb-4 text-cyan-400">만든이</h2>
             <p className="text-slate-300 text-sm">
               Terry
             </p>

@@ -101,14 +101,14 @@ const Signature = () => {
 
             <button
               onClick={handleClear}
-              className="px-4 py-2 md:px-6 md:py-2.5 text-sm md:text-base bg-red-500 text-white rounded-lg hover:bg-red-600 transition font-medium"
+              className="px-4 py-2 md:px-6 md:py-2.5 text-sm md:text-base bg-red-600 text-white rounded-lg hover:bg-red-600 transition font-medium"
             >
               지우기
             </button>
 
             <button
               onClick={handleDownload}
-              className="px-4 py-2 md:px-6 md:py-2.5 text-sm md:text-base bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition font-medium"
+              className="px-4 py-2 md:px-6 md:py-2.5 text-sm md:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-600 transition font-medium"
             >
               다운로드
             </button>
